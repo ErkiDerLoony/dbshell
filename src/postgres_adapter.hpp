@@ -13,7 +13,7 @@ class postgres_adapter {
 
 public:
 
-  postgres_adapter(std::string host, std::string username);
+  postgres_adapter(std::string host, std::string username, std::string database);
 
   virtual ~postgres_adapter();
 
@@ -26,6 +26,8 @@ private:
   std::string _host;
 
   std::string _username;
+
+  std::string _database;
 
 };
 
