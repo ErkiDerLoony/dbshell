@@ -2,9 +2,7 @@
 #define POSTGRES_ADAPTER_HPP
 
 extern "C" {
-
 #include <libpq-fe.h>
-
 }
 
 #include <string>

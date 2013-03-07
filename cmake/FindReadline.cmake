@@ -1,0 +1,16 @@
+FIND_PATH(Readline_INCLUDE_DIRS readline/readline.h)
+FIND_LIBRARY(Readline_LIBRARIES readline) 
+
+IF (Readline_INCLUDE_DIRS AND Readline_LIBRARIES)
+   SET(Readline_FOUND TRUE)
+ENDIF (Readline_INCLUDE_DIRS AND Readline_LIBRARIES)
+
+IF (Readline_FOUND)
+   IF (NOT Readline_FIND_QUIETLY)
+      MESSAGE(STATUS "Found GNU readline: ${Readline_LIBRARIES}")
+   ENDIF (NOT Readline_FIND_QUIETLY)
+ELSE (Readline_FOUND)
+   IF (Readline_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find GNU readline")
+   ENDIF (Readline_FIND_REQUIRED)
+ENDIF (Readline_FOUND)
