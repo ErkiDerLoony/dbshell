@@ -40,16 +40,15 @@ postgres_adapter::~postgres_adapter() {
 pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string query) throw(runtime_error) {
 
   if (_connection == nullptr) {
-    cout << "Connecting to database." << endl;
+    throw runtime_error("Not connected to any database!");
   }
 
   auto res = PQexec(_connection, query.c_str());
 
   if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-    stringstream text;
-    text << "Failed to execute query “" << query << "”";
+    std::string text = PQresultErrorMessage(res);
     PQclear(res);
-    throw runtime_error(text.str());
+    throw runtime_error(text);
   }
 
   int nrows = PQntuples(res);
