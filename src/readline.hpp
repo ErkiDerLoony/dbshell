@@ -1,9 +1,8 @@
 #ifndef READLINE_HPP
 #define READLINE_HPP
 
-#include <stdio.h>
-
 extern "C" {
+#include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 }
