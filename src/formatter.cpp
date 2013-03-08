@@ -1,7 +1,5 @@
 #include "formatter.hpp"
 
-#include <sstream>
-
 using std::string;
 using std::vector;
 using std::stringstream;
@@ -30,8 +28,78 @@ vector<uint> size(const vector<string>& header, const vector<vector<string>>& ro
   return sizes;
 }
 
-string formatHeader(const vector<string>& header, const vector<uint>& sizes) {
+inline string fill(long ms) {
+
+  if (ms < 10) {
+    stringstream buffer;
+    buffer << "00" << ms;
+    return buffer.str();
+  }
+
+  if (ms < 100) {
+    stringstream buffer;
+    buffer << "0" << ms;
+    return buffer.str();
+  }
+
   stringstream buffer;
+  buffer << ms;
+  return buffer.str();
+}
+
+string format_duration(long ms) {
+  long s = ms / 1000;
+  ms %= 1000;
+
+  if (s == 0) {
+    stringstream buffer;
+    buffer << ms << " ms";
+    return buffer.str();
+  }
+
+  long m = s / 60;
+  s %= 60;
+
+  if (m == 0) {
+    stringstream buffer;
+    buffer << s << "." << fill(ms) << " s";
+    return buffer.str();
+  }
+
+  long h = m / 60;
+  m %= 60;
+
+  if (h == 0) {
+    stringstream buffer;
+    buffer << m << ":";
+    if (s < 10) buffer << "0";
+    buffer << s << " min";
+    return buffer.str();
+  }
+
+  long d = h / 24;
+  h %= 24;
+
+  if (d == 0) {
+    stringstream buffer;
+    buffer << h << ":";
+    if (m < 10) buffer << "0";
+    buffer << m << ":";
+    if (s < 10) buffer << "0";
+    buffer << s << " h";
+    return buffer.str();
+  }
+
+  stringstream buffer;
+  buffer << d << "d " << h << ":";
+  if (m < 10) buffer << "0";
+  buffer << m << ":";
+  if (s < 10) buffer << "0";
+  buffer << s;
+  return buffer.str();
+}
+
+string format_header(const vector<string>& header, const vector<uint>& sizes, stringstream& buffer) {
 
   for (uint i = 0; i < header.size(); i++) {
     buffer << "│ ";
@@ -51,8 +119,7 @@ string formatHeader(const vector<string>& header, const vector<uint>& sizes) {
   return buffer.str();
 }
 
-string formatRows(const vector<vector<string>>& rows, const vector<uint>& sizes) {
-  stringstream buffer;
+string format_rows(const vector<vector<string>>& rows, const vector<uint>& sizes, stringstream& buffer) {
 
   for (vector<string> row : rows) {
 
@@ -94,7 +161,7 @@ string format(const vector<string>& header, const vector<vector<string>>& rows) 
     }
   }
 
-  buffer << formatHeader(header, sizes);
+  format_header(header, sizes, buffer);
 
   buffer << "├";
 
@@ -111,7 +178,7 @@ string format(const vector<string>& header, const vector<vector<string>>& rows) 
     }
   }
 
-  buffer << formatRows(rows, sizes);
+  format_rows(rows, sizes, buffer);
 
   buffer << "└";
 

@@ -8,6 +8,8 @@
 #include <vector>
 #include <stdexcept>
 
+#include <sys/time.h>
+
 using namespace dbshell;
 using std::vector;
 using std::string;
@@ -31,8 +33,16 @@ int main(int argc, char** argv) {
     }
 
     try {
+      struct timeval start;
+      gettimeofday(&start, nullptr);
       pair<vector<string>, vector<vector<string>>> table = db.query(line);
+      struct timeval end;
+      gettimeofday(&end, nullptr);
+      const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
       cout << format(table.first, table.second) << endl;
+      cout << table.second.size() << " row";
+      if (table.second.size() != 1) cout << "s";
+      cout << ", " << format_duration(diff) << endl;
     } catch (runtime_error e) {
       cout << e.what();
     }
