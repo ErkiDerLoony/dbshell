@@ -3,74 +3,78 @@
 #include <sstream>
 #include <iostream>
 
-postgres_adapter::postgres_adapter(std::string host, std::string username, std::string database) throw(std::runtime_error)
+using std::pair;
+using std::vector;
+using std::string;
+using std::runtime_error;
+using std::cout;
+using std::endl;
+using std::stringstream;
+
+namespace dbshell {
+
+postgres_adapter::postgres_adapter(string host, string username, string database) throw(runtime_error)
   : _connection(nullptr), _host(host), _username(username), _database(database) {
-  std::cout << "PostgresAdapter created." << std::endl;
-  std::stringstream info;
+  cout << "PostgresAdapter created." << endl;
+  stringstream info;
   info << "host=" << _host << " user=" << _username << " dbname=" << _database;
   _connection = PQconnectdb(info.str().c_str());
 
   if (PQstatus(_connection) != CONNECTION_OK) {
-    std::stringstream text;
+    stringstream text;
     text << "Could not connect to " << _host << " (conninfo: " << info.str() << ")!";
-    throw std::runtime_error(text.str());
+    throw runtime_error(text.str());
   }
 }
 
 postgres_adapter::~postgres_adapter() {
 
   if (_connection != nullptr) {
-    std::cout << "Disconnecting from database." << std::endl;
+    cout << "Disconnecting from database." << endl;
     PQfinish(_connection);
   }
 
-  std::cout << "PostgresAdapter destroyed." << std::endl;
+  cout << "PostgresAdapter destroyed." << endl;
 }
 
-std::string postgres_adapter::query(std::string query) throw(std::runtime_error) {
+pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string query) throw(runtime_error) {
 
   if (_connection == nullptr) {
-    std::cout << "Connecting to database." << std::endl;
+    cout << "Connecting to database." << endl;
   }
 
   auto res = PQexec(_connection, query.c_str());
 
   if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-    std::stringstream text;
+    stringstream text;
     text << "Failed to execute query “" << query << "”";
     PQclear(res);
-    throw std::runtime_error(text.str());
+    throw runtime_error(text.str());
   }
 
-  int rows = PQntuples(res);
-  int cols = PQnfields(res);
+  int nrows = PQntuples(res);
+  int ncols = PQnfields(res);
 
-  for (int i = 0; i < cols; i++) {
-    std::string label = PQfname(res, i);
-    std::cout << label;
+  vector<string> columns;
+  vector<vector<string>> rows;
 
-    if (i < cols - 1) {
-      std::cout << ", ";
-    } else {
-      std::cout << std::endl;
-    }
+  for (int i = 0; i < ncols; i++) {
+    columns.push_back(PQfname(res, i));
   }
 
-  for (int i = 0; i < rows; i++) {
+  for (int i = 0; i < nrows; i++) {
+    vector<string> row;
 
-    for (int j = 0; j < cols; j++) {
-      std::string cell = PQgetvalue(res, i, j);
-      std::cout << cell;
-
-      if (j < cols - 1) {
-        std::cout << ", ";
-      } else {
-        std::cout << std::endl;
-      }
+    for (int j = 0; j < ncols; j++) {
+      row.push_back(PQgetvalue(res, i, j));
     }
+
+    rows.push_back(row);
   }
 
   PQclear(res);
 
-  return "";
+  return pair<vector<string>, vector<vector<string>>>(columns, rows);
 }
+
+} /* namespace dbshell */

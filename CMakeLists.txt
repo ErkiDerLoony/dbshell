@@ -1,6 +1,6 @@
 project(dbshell C CXX)
 cmake_minimum_required(VERSION 2.6)
-add_definitions(--std=c++11 -Wall -g -O2)
+add_definitions(--std=c++11 -Wall -g -O2 -pedantic)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(Readline REQUIRED)

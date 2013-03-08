@@ -6,7 +6,10 @@ extern "C" {
 }
 
 #include <string>
+#include <vector>
 #include <stdexcept>
+
+namespace dbshell {
 
 /**
  * This class wraps a connection to some PostgreSQL database.
@@ -34,10 +37,11 @@ public:
    * Execute a query on this connection.
    *
    * @param query  The query string.
-   * @return  The result of the query.
+   * @return  The result of the query. The first element of the returned pair
+   *          contains the column names, the second element contains the rows.
    * @throws  If no connection to the database was established.
    */
-  virtual std::string query(std::string query) throw (std::runtime_error);
+  virtual std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>> query(std::string query) throw (std::runtime_error);
 
 private:
 
@@ -49,6 +53,8 @@ private:
 
   std::string _database;
 
-};
+}; /* class postgres_adapter */
+
+} /* namespace dbshell */
 
 #endif /* POSTGRES_ADAPTER_HPP */
