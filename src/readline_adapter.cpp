@@ -15,6 +15,7 @@ std::string readline() {
 
   if (buffer != NULL) {
     std::string line = buffer;
+    add_history(line.c_str());
     free(buffer);
     return line;
   } else {

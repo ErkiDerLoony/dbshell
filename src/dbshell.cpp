@@ -4,16 +4,20 @@
 #include <iostream>
 
 int main(int argc, char** argv) {
-  //postgres_adapter db("dwh.camato.eu", "read", "dwh_production");
-  //db.query("SELECT * FROM keyword_dim LIMIT 1");
+  postgres_adapter db("dwh.camato.eu", "read", "dwh_production");
 
-  dbshell::prompt = "->";
+  dbshell::prompt = "-> ";
   std::string line;
 
-  do {
+  while (true) {
     line = dbshell::readline();
-    std::cout << line << std::endl;
-  } while (line != "quit");
+
+    if (line == "quit") {
+      break;
+    }
+
+    db.query(line);
+  }
 
   std::cout << "Bye." << std::endl;
 
