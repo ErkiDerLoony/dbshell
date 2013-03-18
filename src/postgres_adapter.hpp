@@ -5,6 +5,8 @@ extern "C" {
 #include <libpq-fe.h>
 }
 
+#include "db_adapter.hpp"
+
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -16,7 +18,7 @@ namespace dbshell {
  *
  * @author Edgar Kalkowski <eMail@edgar-kalkowski.de>
  */
-class postgres_adapter {
+class postgres_adapter : public db_adapter {
 
 public:
 
@@ -33,14 +35,6 @@ public:
   /** Disconnect from the database and release all resources. */
   virtual ~postgres_adapter();
 
-  /**
-   * Execute a query on this connection.
-   *
-   * @param query  The query string.
-   * @return  The result of the query. The first element of the returned pair
-   *          contains the column names, the second element contains the rows.
-   * @throws  If no connection to the database was established or the query failed to execute.
-   */
   virtual std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>> query(std::string query) throw (std::runtime_error);
 
 private:

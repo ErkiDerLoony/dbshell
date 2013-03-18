@@ -1,26 +1,87 @@
 #include "postgres_adapter.hpp"
 #include "readline_adapter.hpp"
 #include "formatter.hpp"
+#include "getopt.hpp"
+#include "db_adapter.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <list>
 #include <vector>
 #include <stdexcept>
+#include <memory>
 
 #include <sys/time.h>
 
 using namespace dbshell;
 using std::vector;
+using std::list;
 using std::string;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::pair;
 using std::stringstream;
 using std::runtime_error;
 
 int main(int argc, char** argv) {
-  postgres_adapter db("dwh.camato.eu", "read", "dwh_production");
+  std::shared_ptr<db_adapter> connection;
+  list<std::unique_ptr<db_adapter>> connections;
+
+  { // Release getopt instance asap.
+    getopt args(argc, argv);
+
+    if (args.list().empty()) {
+      cerr << "You must specify at least one connection string on the command line!" << endl;
+      return 1;
+    }
+
+    // for (string entry : args.list()) {
+    string entry = args.list().front();
+    auto index = entry.find("://");
+
+    if (index == string::npos) {
+      cerr << "Could not find schema in connection string »" << entry << "«!" << endl;
+      return 1;
+    }
+
+    string schema = entry.substr(0, index);
+    string rest = entry.substr(index + 3, entry.length());
+
+    if (rest == "") {
+      cerr << "No hostname in connection string »" << entry << "«!" << endl;
+      return 1;
+    }
+
+    string username = "";
+    index = rest.find("@");
+
+    if (index != string::npos) {
+      username = rest.substr(0, index);
+      rest = rest.substr(index + 1, rest.length());
+    }
+
+    string host = "";
+    index = rest.find("/");
+
+    if (index != string::npos) {
+      host = rest.substr(0, index);
+      rest = rest.substr(index + 1, rest.length());
+    }
+
+    string database = rest;
+
+    if (args.list().size() > 1) {
+      cout << "WARNING: Only one connection is supported. Ignoring further connections." << endl;
+    }
+
+    // }
+  }
+
+  return 0;
+
+  postgres_adapter db("dwh.camato.eu", "camato", "dwh_production");
 
   prompt = "-> ";
   string line;
