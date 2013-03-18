@@ -1,0 +1,16 @@
+FIND_PATH(Libiodbc_INCLUDE_DIRS libiodbc/sql.h)
+FIND_LIBRARY(Libiodbc_LIBRARIES libiodbc.so)
+
+IF (Libiodbc_INCLUDE_DIRS AND Libiodbc_LIBRARIES)
+   SET(Libiodbc_FOUND TRUE)
+ENDIF (Libiodbc_INCLUDE_DIRS AND Libiodbc_LIBRARIES)
+
+IF (Libiodbc_FOUND)
+   IF (NOT Libiodbc_FIND_QUIETLY)
+      MESSAGE(STATUS "Found iODBC: ${Libiodbc_LIBRARIES}")
+   ENDIF (NOT Libiodbc_FIND_QUIETLY)
+ELSE (Libiodbc_FOUND)
+   IF (Libiodbc_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find iODBC")
+   ENDIF (Libiodbc_FIND_REQUIRED)
+ENDIF (Libiodbc_FOUND)

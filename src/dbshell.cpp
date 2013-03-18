@@ -1,7 +1,8 @@
-#include "postgres_adapter.hpp"
 #include "readline_adapter.hpp"
 #include "formatter.hpp"
 #include "db_adapter.hpp"
+#include "virtuoso_adapter.hpp"
+#include "postgres_adapter.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -68,6 +69,8 @@ int main(int argc, char** argv) {
 
   if (schema == "postgres" || schema == "postgresql") {
     db = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
+  } else if (schema == "virtuoso") {
+    db = std::shared_ptr<db_adapter>(new virtuoso_adapter(host, username));
   } else {
     cerr << "Unsupported database type: " << schema << endl;
     return 1;

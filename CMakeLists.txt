@@ -9,6 +9,9 @@ include_directories(${Readline_INCLUDE_DIRS})
 find_package(PostgreSQL REQUIRED)
 include_directories(${PostgreSQL_INCLUDE_DIRS})
 
+find_package(Libiodbc REQUIRED)
+include_directories(${Libiodbc_INCLUDE_DIRS})
+
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
   add_custom_target(doc ${DOXYGEN_EXECUTABLE}
