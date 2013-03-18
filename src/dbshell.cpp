@@ -1,7 +1,6 @@
 #include "postgres_adapter.hpp"
 #include "readline_adapter.hpp"
 #include "formatter.hpp"
-#include "getopt.hpp"
 #include "db_adapter.hpp"
 
 #include <iostream>
@@ -26,62 +25,53 @@ using std::stringstream;
 using std::runtime_error;
 
 int main(int argc, char** argv) {
-  std::shared_ptr<db_adapter> connection;
-  list<std::unique_ptr<db_adapter>> connections;
 
-  { // Release getopt instance asap.
-    getopt args(argc, argv);
-
-    if (args.list().empty()) {
-      cerr << "You must specify at least one connection string on the command line!" << endl;
-      return 1;
-    }
-
-    // for (string entry : args.list()) {
-    string entry = args.list().front();
-    auto index = entry.find("://");
-
-    if (index == string::npos) {
-      cerr << "Could not find schema in connection string »" << entry << "«!" << endl;
-      return 1;
-    }
-
-    string schema = entry.substr(0, index);
-    string rest = entry.substr(index + 3, entry.length());
-
-    if (rest == "") {
-      cerr << "No hostname in connection string »" << entry << "«!" << endl;
-      return 1;
-    }
-
-    string username = "";
-    index = rest.find("@");
-
-    if (index != string::npos) {
-      username = rest.substr(0, index);
-      rest = rest.substr(index + 1, rest.length());
-    }
-
-    string host = "";
-    index = rest.find("/");
-
-    if (index != string::npos) {
-      host = rest.substr(0, index);
-      rest = rest.substr(index + 1, rest.length());
-    }
-
-    string database = rest;
-
-    if (args.list().size() > 1) {
-      cout << "WARNING: Only one connection is supported. Ignoring further connections." << endl;
-    }
-
-    // }
+  if (argc < 2) {
+    cerr << "You must specify a connection string on the command line!" << endl;
+    return 1;
   }
 
-  return 0;
+  string arg(argv[1]);
+  auto index = arg.find("://");
 
-  postgres_adapter db("dwh.camato.eu", "camato", "dwh_production");
+  if (index == string::npos) {
+    cerr << "Could not find schema in connection string »" << arg << "«!" << endl;
+    return 1;
+  }
+
+  string schema = arg.substr(0, index);
+  string rest = arg.substr(index + 3, arg.length());
+
+  if (rest == "") {
+    cerr << "No hostname in connection string »" << arg << "«!" << endl;
+    return 1;
+  }
+
+  string username = "";
+  index = rest.find("@");
+
+  if (index != string::npos) {
+    username = rest.substr(0, index);
+    rest = rest.substr(index + 1, rest.length());
+  }
+
+  string host = "";
+  index = rest.find("/");
+
+  if (index != string::npos) {
+    host = rest.substr(0, index);
+    rest = rest.substr(index + 1, rest.length());
+  }
+
+  string database = rest;
+  std::shared_ptr<db_adapter> db;
+
+  if (schema == "postgres" || schema == "postgresql") {
+    db = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
+  } else {
+    cerr << "Unsupported database type: " << schema << endl;
+    return 1;
+  }
 
   prompt = "-> ";
   string line;
@@ -96,7 +86,7 @@ int main(int argc, char** argv) {
     try {
       struct timeval start;
       gettimeofday(&start, nullptr);
-      pair<vector<string>, vector<vector<string>>> table = db.query(line);
+      pair<vector<string>, vector<vector<string>>> table = db->query(line);
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
