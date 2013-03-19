@@ -1,5 +1,7 @@
 #include "readline_adapter.hpp"
 
+#include <iostream>
+
 extern "C" {
 #include <stdio.h>
 #include <readline/readline.h>
@@ -11,16 +13,31 @@ namespace dbshell {
 std::string prompt = "->";
 
 std::string readline() {
-  char* buffer = ::readline(prompt.c_str());
+  std::string line;
 
-  if (buffer != NULL) {
-    std::string line = buffer;
-    add_history(line.c_str());
-    free(buffer);
-    return line;
-  } else {
-    return std::string();
-  }
+  do {
+    char* buffer;
+
+    if (line.length() > 0) {
+      buffer = ::readline("");
+    } else {
+      buffer = ::readline(prompt.c_str());
+    }
+
+    if (buffer != NULL) {
+
+      if (line.length() > 0) {
+        line += "\n";
+      }
+
+      line += buffer;
+      free(buffer);
+    }
+
+  } while (line.length() < 1 || line.substr(line.length() - 1, line.length()) != ";");
+
+  ::add_history(line.c_str());
+  return line;
 }
 
 } /* namespace dbshell */

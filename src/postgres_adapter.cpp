@@ -1,21 +1,17 @@
 #include "postgres_adapter.hpp"
 
 #include <sstream>
-#include <iostream>
 
 using std::pair;
 using std::vector;
 using std::string;
 using std::runtime_error;
-using std::cout;
-using std::endl;
 using std::stringstream;
 
 namespace dbshell {
 
 postgres_adapter::postgres_adapter(string host, string username, string database) throw(runtime_error)
   : _connection(nullptr), _host(host), _username(username), _database(database) {
-  cout << "PostgresAdapter created." << endl;
   stringstream info;
   info << "host=" << _host << " user=" << _username << " dbname=" << _database;
   _connection = PQconnectdb(info.str().c_str());
@@ -30,11 +26,8 @@ postgres_adapter::postgres_adapter(string host, string username, string database
 postgres_adapter::~postgres_adapter() {
 
   if (_connection != nullptr) {
-    cout << "Disconnecting from database." << endl;
     PQfinish(_connection);
   }
-
-  cout << "PostgresAdapter destroyed." << endl;
 }
 
 pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string query) throw(runtime_error) {

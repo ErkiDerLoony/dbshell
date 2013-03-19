@@ -99,8 +99,9 @@ int main(int argc, char** argv) {
 
   while (true) {
     line = readline();
+    line = line.substr(0, line.length() - 1);
 
-    if (line == "quit" || line == "quit;") {
+    if (line == "quit") {
       break;
     }
 

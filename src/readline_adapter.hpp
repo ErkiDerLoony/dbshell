@@ -15,8 +15,9 @@ extern std::string prompt;
 
 /**
  * Wrap the GNU readline library to get a line of text from the terminal.
- * The line of text is additionally added to the history which enables
- * convenient browsing of previous input.
+ * The line is actually constructed from multiple lines until one line
+ * ends with a semicolon. The whole line of text is additionally added to
+ * the history to allow for convenient browsing of past lines.
  *
  * @return  The line of text.
  */
