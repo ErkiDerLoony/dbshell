@@ -26,3 +26,6 @@ pair<vector<string>, vector<vector<string>>> virtuoso_adapter::query(string quer
   pair<vector<string>, vector<vector<string>>> p;
   return p;
 }
+
+void virtuoso_adapter::cancel() {
+}

@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <memory>
 
+#include <signal.h>
 #include <sys/time.h>
 
 using namespace dbshell;
@@ -24,6 +25,20 @@ using std::endl;
 using std::pair;
 using std::stringstream;
 using std::runtime_error;
+
+namespace dbshell {
+  bool running = false;
+  std::shared_ptr<db_adapter> connection = std::shared_ptr<db_adapter>(nullptr);
+}
+
+void handler(int sig) {
+
+  if (!running) {
+    return;
+  }
+
+  dbshell::connection->cancel();
+}
 
 int main(int argc, char** argv) {
 
@@ -65,16 +80,19 @@ int main(int argc, char** argv) {
   }
 
   string database = rest;
-  std::shared_ptr<db_adapter> db;
 
   if (schema == "psql" || schema == "postgres" || schema == "postgresql") {
-    db = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
+    dbshell::connection = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
   } else if (schema == "virtuoso") {
-    db = std::shared_ptr<db_adapter>(new virtuoso_adapter(host, username));
+    dbshell::connection = std::shared_ptr<db_adapter>(new virtuoso_adapter(host, username));
   } else {
     cerr << "Unsupported database type: " << schema << endl;
     return 1;
   }
+
+  signal(SIGABRT, &handler);
+  signal(SIGTERM, &handler);
+  signal(SIGINT, &handler);
 
   prompt = "-> ";
   string line;
@@ -89,7 +107,9 @@ int main(int argc, char** argv) {
     try {
       struct timeval start;
       gettimeofday(&start, nullptr);
-      pair<vector<string>, vector<vector<string>>> table = db->query(line);
+      dbshell::running = true;
+      pair<vector<string>, vector<vector<string>>> table = dbshell::connection->query(line);
+      dbshell::running = false;
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;

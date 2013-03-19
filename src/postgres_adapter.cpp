@@ -76,4 +76,11 @@ pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string quer
   return pair<vector<string>, vector<vector<string>>>(columns, rows);
 }
 
+void postgres_adapter::cancel() {
+  PGcancel* cancel = PQgetCancel(_connection);
+  char buffer[512];
+  PQcancel(cancel, buffer, 512);
+  PQfreeCancel(cancel);
+}
+
 } /* namespace dbshell */

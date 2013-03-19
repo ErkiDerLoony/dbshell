@@ -19,6 +19,8 @@ public:
 
   virtual std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>> query(std::string query) throw (std::runtime_error);
 
+  virtual void cancel();
+
 };
 
 } /* namespace dbshell */
