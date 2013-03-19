@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
   string database = rest;
   std::shared_ptr<db_adapter> db;
 
-  if (schema == "postgres" || schema == "postgresql") {
+  if (schema == "psql" || schema == "postgres" || schema == "postgresql") {
     db = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
   } else if (schema == "virtuoso") {
     db = std::shared_ptr<db_adapter>(new virtuoso_adapter(host, username));
