@@ -9,10 +9,21 @@
 
 namespace dbshell {
 
+/**
+ * This class represents a connection to a virtuoso database.
+ *
+ * @author Edgar Kalkowski <eMail@edgar-kalkowski.de>
+ */
 class virtuoso_adapter : public db_adapter {
 
 public:
 
+  /**
+   * Create a new adapter.
+   *
+   * @param host  The hostname of the database server to connect to.
+   * @param username  The username to use for login.
+   */
   virtuoso_adapter(std::string host, std::string username);
 
   virtual ~virtuoso_adapter();
