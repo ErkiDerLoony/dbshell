@@ -8,22 +8,51 @@
 namespace dbshell {
 
 /** Abstract superclass for columns of a table. */
-template<typename T>
 class column {
 
 public:
 
-  typedef T type;
-
-  column(T value);
+  explicit column(std::string name);
 
   virtual ~column();
 
-  void print();
+  std::string name();
 
 private:
 
-  T _value;
+  std::string _name;
+
+};
+
+class double_column : public column {
+
+public:
+
+  explicit double_column(std::string name);
+
+  virtual ~double_column();
+
+  std::string name();
+
+  std::string format(double value);
+
+private:
+
+};
+
+class long_column : public column {
+
+public:
+
+  explicit long_column(std::string name);
+
+  virtual ~long_column();
+
+  std::string name();
+
+  std::string format(long value);
+
+private:
 
 };
 
@@ -43,13 +72,13 @@ public:
    *
    * @param column  A pointer to the new column.
    */
-  //  void add_column(std::shared_ptr<column> column);
+  void add_column(std::shared_ptr<column> column);
 
   static bool debug;
 
 private:
 
-  //  std::vector<std::shared_ptr<column>> _columns;
+  std::vector<std::shared_ptr<column>> _columns;
 
 };
 
