@@ -7,16 +7,45 @@
 
 namespace dbshell {
 
+enum alignment_type {
+
+  LEFT,
+
+  CENTER,
+
+  RIGHT
+
+};
+
 /** Abstract superclass for columns of a table. */
 class column {
 
 public:
 
+  /**
+   * Create a new column.
+   *
+   * @param name  The name of the new column.
+   */
   explicit column(std::string name);
 
+  /** Destroy this column. */
   virtual ~column();
 
+  /**
+   * Access the name of this column.
+   *
+   * @return  This column’s name.
+   */
   std::string name();
+
+  /**
+   * Access the alignment of this column.
+   *
+   * @return  This column’s preferred way of how textual output shall be
+   *          aligned.
+   */
+  alignment_type alignment();
 
 private:
 
@@ -24,16 +53,29 @@ private:
 
 };
 
+/** A column whose values are of type double. */
 class double_column : public column {
 
 public:
 
+  /**
+   * Create a new column that may contain values of type double.
+   *
+   * @param name  The name of the new column.
+   */
   explicit double_column(std::string name);
 
+  /** Destroy this column. */
   virtual ~double_column();
 
   std::string name();
 
+  /**
+   * Format a value according to this column’s layout.
+   *
+   * @param value  The value that shall be formatted.
+   * @return  The given value formatted according to this column’s preferred layout (which may consider other values in this column).
+   */
   std::string format(double value);
 
 private:
@@ -51,6 +93,8 @@ public:
   std::string name();
 
   std::string format(long value);
+
+  alignment_type alignment();
 
 private:
 
