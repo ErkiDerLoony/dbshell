@@ -69,6 +69,11 @@ table::~table() {
   if (table::debug) cout << "Table destroyed." << endl;
 }
 
+void table::add_column(shared_ptr<column> column) {
+  _columns.push_back(column);
+  if (table::debug) cout << "Column " << column << " added." << endl;
+}
+
 int main(int argc, char** argv) {
   table::debug = true;
   shared_ptr<long_column> timestamp = shared_ptr<long_column>(new long_column("timestamp"));
@@ -78,8 +83,8 @@ int main(int argc, char** argv) {
   columns.push_back(timestamp);
   columns.push_back(value);
 
-  //table table;
-  //table.add_column(shared_ptr<column>(new long_column("timestamp")));
-  //table.add_column(shared_ptr<column>(new double_column("value")));
+  table table;
+  table.add_column(timestamp);
+  table.add_column(value);
   return 0;
 }
