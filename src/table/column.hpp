@@ -2,6 +2,8 @@
 #define COLUMN_HPP
 
 #include <string>
+#include <memory>
+#include <iostream>
 
 namespace dbshell {
 
@@ -24,8 +26,10 @@ public:
    * Create a new column.
    *
    * @param name  The name of the new column.
+   * @param alignment  Specifies how values of this column shall be aligned in
+   *                   output.
    */
-  explicit column(std::string name);
+  explicit column(std::string name, alignment_type alignment);
 
   /** Destroy this column. */
   virtual ~column();
@@ -35,7 +39,7 @@ public:
    *
    * @return  This column’s name.
    */
-  std::string name() const;
+  virtual std::string name() const final;
 
   /**
    * Access the alignment of this column.
@@ -43,14 +47,25 @@ public:
    * @return  This column’s preferred way of how textual output shall be
    *          aligned.
    */
-  alignment_type alignment() const;
+  virtual alignment_type alignment() const final;
+
+  /**
+   * Create a textual representation of this column.
+   *
+   * @return  A textual representation of this column.
+   */
+  virtual std::string str() const = 0;
 
 private:
 
   const std::string _name;
 
+  const alignment_type _alignment;
+
 };
 
 } /* namespace dbshell */
+
+std::ostream& operator<<(std::ostream& stream, dbshell::column const& column);
 
 #endif /* COLUMN_HPP */

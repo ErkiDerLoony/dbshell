@@ -3,6 +3,7 @@
 
 #include "column.hpp"
 
+#include <memory>
 #include <string>
 
 namespace dbshell {
@@ -22,8 +23,6 @@ public:
   /** Destroy this column. */
   virtual ~double_column();
 
-  std::string name() const;
-
   /**
    * Format a value according to this column’s layout.
    *
@@ -31,13 +30,11 @@ public:
    * @return  The given value formatted according to this column’s preferred
    *          layout (which may consider other values in this column).
    */
-  std::string format(double value) const;
+  virtual std::string format(double value) const;
 
-  alignment_type alignment() const;
+  virtual std::string str() const override;
 
 private:
-
-  const alignment_type _alignment;
 
 };
 

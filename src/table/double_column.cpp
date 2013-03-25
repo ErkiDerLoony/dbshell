@@ -8,15 +8,13 @@ using std::stringstream;
 using std::string;
 using std::cout;
 using std::endl;
+using std::ostream;
+using std::shared_ptr;
 
-double_column::double_column(string name) : column(name), _alignment(alignment_type::LEFT) {
+double_column::double_column(string name) : column(name, alignment_type::LEFT) {
 }
 
 double_column::~double_column() {
-}
-
-string double_column::name() const {
-  return column::name();
 }
 
 string double_column::format(double value) const {
@@ -25,6 +23,6 @@ string double_column::format(double value) const {
   return s.str();
 }
 
-alignment_type double_column::alignment() const {
-  return _alignment;
+string double_column::str() const {
+  return "double_column(" + name() + ")";
 }

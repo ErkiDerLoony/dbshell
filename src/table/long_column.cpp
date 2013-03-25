@@ -6,14 +6,10 @@ using namespace dbshell;
 using std::stringstream;
 using std::string;
 
-long_column::long_column(std::string name) : column(name), _alignment(alignment_type::LEFT) {
+long_column::long_column(std::string name) : column(name, alignment_type::LEFT) {
 }
 
 long_column::~long_column() {
-}
-
-string long_column::name() const {
-  return column::name();
 }
 
 string long_column::format(long value) const {
@@ -22,6 +18,6 @@ string long_column::format(long value) const {
   return s.str();
 }
 
-alignment_type long_column::alignment() const {
-  return _alignment;
+string long_column::str() const {
+  return "long_column(" + name() + ")";
 }

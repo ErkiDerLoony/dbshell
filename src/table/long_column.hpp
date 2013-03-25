@@ -22,32 +22,17 @@ public:
   /** Destroy this column and release acquired resources. */
   virtual ~long_column();
 
-  /** 
-   * Access the name of this column.
-   *
-   * @return  This column’s name.
-   */
-  std::string name() const;
-
   /**
    * Format a value according to the other values in this column.
    *
    * @param value  The value to format.
    * @return  A string representation of the given value.
    */
-  std::string format(long value) const;
+  virtual std::string format(long value) const;
 
-  /**
-   * Access the alignment type of this column that specifies how values of this
-   * column should be arranged with respect to other values in output.
-   * 
-   * @return  Left, center or right alignment.
-   */
-  alignment_type alignment() const;
+  virtual std::string str() const override;
 
 private:
-
-  const alignment_type _alignment;
 
 };
 

@@ -25,7 +25,7 @@ table::~table() {
 
 void table::add_column(shared_ptr<column> column) {
   _columns.push_back(column);
-  if (table::debug) cout << "Column " << column << " added." << endl;
+  if (table::debug) cout << "Column " << (*column) << " added." << endl;
 }
 
 int main(int argc, char** argv) {
