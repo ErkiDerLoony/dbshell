@@ -6,11 +6,12 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 
 namespace dbshell {
 
 /** A result structure for tables queried from a database. */
-class table {
+class table final {
 
 public:
 
@@ -19,6 +20,13 @@ public:
 
   /** Destroy a table and free it’s resources. */
   virtual ~table();
+
+  /**
+   * Access all columns of this table.
+   *
+   * @return  A reference to this table’s columns.
+   */
+  const std::vector<std::shared_ptr<column>>& columns() const;
 
   /**
    * Add a new column to this table.
@@ -36,5 +44,16 @@ private:
 };
 
 } /* namespace dbshell */
+
+/**
+ * Output tables.
+ *
+ * @param stream  The output stream to which a textual representation of a table
+ *                shall be appended.
+ * @param table  The table whose textual representation shall be appended to the
+ *               given output stream.
+ * @return  A reference to the given stream with the given table appended to it.
+ */
+std::ostream& operator<<(std::ostream& stream, const dbshell::table& table);
 
 #endif /* TABLE_HPP */

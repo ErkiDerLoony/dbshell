@@ -19,7 +19,7 @@ alignment_type column::alignment() const {
   return _alignment;
 }
 
-ostream& operator<<(ostream& stream, column const& column) {
+ostream& operator<<(ostream& stream, const column& column) {
   stream << column.str();
   return stream;
 }

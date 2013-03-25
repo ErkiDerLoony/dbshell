@@ -66,6 +66,15 @@ private:
 
 } /* namespace dbshell */
 
-std::ostream& operator<<(std::ostream& stream, dbshell::column const& column);
+/**
+ * Output columns.
+ *
+ * @param stream  The stream to which a textual representation of the given
+ *                column shall be appended.
+ * @param column  The column whose textual representation shall be appended
+ *                to the given stream.
+ * @return  A reference to the stream with the appended column.
+ */
+std::ostream& operator<<(std::ostream& stream, const dbshell::column& column);
 
 #endif /* COLUMN_HPP */
