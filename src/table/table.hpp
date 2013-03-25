@@ -2,6 +2,7 @@
 #define TABLE_HPP
 
 #include "column.hpp"
+#include "row.hpp"
 
 #include <vector>
 #include <string>
@@ -35,11 +36,15 @@ public:
    */
   void add_column(std::shared_ptr<column> column);
 
+  void add_row(std::shared_ptr<row> row);
+
   static bool debug;
 
 private:
 
   std::vector<std::shared_ptr<column>> _columns;
+
+  std::vector<std::shared_ptr<row>> _rows;
 
 };
 

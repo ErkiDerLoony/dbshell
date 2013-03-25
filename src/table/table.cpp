@@ -1,6 +1,7 @@
 #include "table.hpp"
 #include "double_column.hpp"
 #include "long_column.hpp"
+#include "row.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -27,6 +28,11 @@ table::~table() {
 void table::add_column(shared_ptr<column> column) {
   _columns.push_back(column);
   if (table::debug) cout << "Column " << (*column) << " added." << endl;
+}
+
+void table::add_row(shared_ptr<row> row) {
+  _rows.push_back(row);
+  if (table::debug) cout << "Row " << (*row) << " added." << endl;
 }
 
 const vector<shared_ptr<column>>& table::columns() const {
@@ -144,6 +150,11 @@ int main(int argc, char** argv) {
   table table;
   table.add_column(timestamp);
   table.add_column(value);
+
+  shared_ptr<row> r = shared_ptr<row>(new row());
+  r->set(timestamp, shared_ptr<int>(new int(2)));
+  r->set(value, shared_ptr<double>(new double(0.5)));
+  table.add_row(r);
 
   cout << table << endl;
 
