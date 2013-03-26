@@ -3,10 +3,6 @@
 
 #include "db_adapter.hpp"
 
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 namespace dbshell {
 
 /**
@@ -28,9 +24,9 @@ public:
 
   virtual ~virtuoso_adapter();
 
-  virtual std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>> query(std::string query) throw (std::runtime_error);
+  virtual std::unique_ptr<table> query(std::string query) throw (std::runtime_error) override;
 
-  virtual void cancel();
+  virtual void cancel() override;
 
 };
 

@@ -7,10 +7,6 @@ extern "C" {
 
 #include "db_adapter.hpp"
 
-#include <string>
-#include <vector>
-#include <stdexcept>
-
 namespace dbshell {
 
 /**
@@ -35,9 +31,9 @@ public:
   /** Disconnect from the database and release all resources. */
   virtual ~postgres_adapter();
 
-  virtual std::pair<std::vector<std::string>, std::vector<std::vector<std::string>>> query(std::string query) throw (std::runtime_error);
+  virtual std::unique_ptr<table> query(std::string query) throw (std::runtime_error) override;
 
-  virtual void cancel();
+  virtual void cancel() override;
 
 private:
 

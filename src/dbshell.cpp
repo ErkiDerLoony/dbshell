@@ -7,8 +7,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <list>
-#include <vector>
 #include <stdexcept>
 #include <memory>
 
@@ -16,8 +14,7 @@
 #include <sys/time.h>
 
 using namespace dbshell;
-using std::vector;
-using std::list;
+using std::unique_ptr;
 using std::string;
 using std::cout;
 using std::cerr;
@@ -28,7 +25,7 @@ using std::runtime_error;
 
 namespace dbshell {
   bool running = false;
-  std::shared_ptr<db_adapter> connection = std::shared_ptr<db_adapter>(nullptr);
+  unique_ptr<db_adapter> connection = unique_ptr<db_adapter>(nullptr);
 }
 
 void handler(int sig) {
@@ -82,9 +79,9 @@ int main(int argc, char** argv) {
   string database = rest;
 
   if (schema == "psql" || schema == "postgres" || schema == "postgresql") {
-    dbshell::connection = std::shared_ptr<db_adapter>(new postgres_adapter(host, username, database));
+    dbshell::connection = unique_ptr<db_adapter>(new postgres_adapter(host, username, database));
   } else if (schema == "virtuoso") {
-    dbshell::connection = std::shared_ptr<db_adapter>(new virtuoso_adapter(host, username));
+    dbshell::connection = unique_ptr<db_adapter>(new virtuoso_adapter(host, username));
   } else {
     cerr << "Unsupported database type: " << schema << endl;
     return 1;
@@ -109,14 +106,14 @@ int main(int argc, char** argv) {
       struct timeval start;
       gettimeofday(&start, nullptr);
       dbshell::running = true;
-      pair<vector<string>, vector<vector<string>>> table = dbshell::connection->query(line);
+      unique_ptr<table> table = dbshell::connection->query(line);
       dbshell::running = false;
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
-      cout << format(table.first, table.second) << endl;
-      cout << table.second.size() << " row";
-      if (table.second.size() != 1) cout << "s";
+      cout << *table << endl;
+      cout << table->rows() << " row";
+      if (table->rows() != 1) cout << "s";
       cout << ", " << format_duration(diff) << endl;
     } catch (runtime_error e) {
       cout << e.what();

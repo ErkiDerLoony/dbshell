@@ -7,6 +7,7 @@ using std::vector;
 using std::string;
 using std::runtime_error;
 using std::stringstream;
+using std::unique_ptr;
 
 namespace dbshell {
 
@@ -30,7 +31,7 @@ postgres_adapter::~postgres_adapter() {
   }
 }
 
-pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string query) throw(runtime_error) {
+unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
 
   if (_connection == nullptr) {
     throw runtime_error("Not connected to any database!");
@@ -47,11 +48,10 @@ pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string quer
   int nrows = PQntuples(res);
   int ncols = PQnfields(res);
 
-  vector<string> columns;
-  vector<vector<string>> rows;
+  unique_ptr<table> result = unique_ptr<table>(new table());
 
   for (int i = 0; i < ncols; i++) {
-    columns.push_back(PQfname(res, i));
+    result->add(PQfname(res, i));
   }
 
   for (int i = 0; i < nrows; i++) {
@@ -61,12 +61,12 @@ pair<vector<string>, vector<vector<string>>> postgres_adapter::query(string quer
       row.push_back(PQgetvalue(res, i, j));
     }
 
-    rows.push_back(row);
+    result->add(row);
   }
 
   PQclear(res);
 
-  return pair<vector<string>, vector<vector<string>>>(columns, rows);
+  return result;
 }
 
 void postgres_adapter::cancel() {
