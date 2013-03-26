@@ -63,6 +63,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     Oid type = PQftype(res, i);
 
     switch (type) {
+    case 20: // int8
     case 23: // int4
     case 1700: // numeric
       a = alignment_type::RIGHT;

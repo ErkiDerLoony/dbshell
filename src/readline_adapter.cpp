@@ -1,6 +1,8 @@
 #include "readline_adapter.hpp"
 
-#include <iostream>
+#include <errno.h>
+#include <pwd.h>
+#include <unistd.h>
 
 extern "C" {
 #include <stdio.h>
@@ -8,12 +10,13 @@ extern "C" {
 #include <readline/history.h>
 }
 
-namespace dbshell {
+using namespace dbshell;
+using std::string;
 
-std::string prompt = "->";
+string dbshell::prompt = "->";
 
-std::string readline() {
-  std::string line;
+string dbshell::readline() {
+  string line;
 
   do {
     char* buffer;
@@ -21,7 +24,7 @@ std::string readline() {
     if (line.length() > 0) {
       buffer = ::readline("");
     } else {
-      buffer = ::readline(prompt.c_str());
+      buffer = ::readline(dbshell::prompt.c_str());
     }
 
     if (buffer != NULL) {
@@ -40,4 +43,33 @@ std::string readline() {
   return line;
 }
 
-} /* namespace dbshell */
+class history_management {
+
+public:
+
+  history_management() {
+    filename = string(getpwuid(getuid())->pw_dir);
+    filename += "/.config/dbshell_history";
+
+    int result = ::read_history(filename.c_str());
+
+    if (result != 0) {
+      perror("load readline history");
+    }
+  }
+
+  virtual ~history_management() {
+    int result = ::write_history(filename.c_str());
+
+    if (result != 0) {
+      perror("save readline history");
+    }
+  }
+
+private:
+
+  string filename;
+
+};
+
+const history_management _r;
