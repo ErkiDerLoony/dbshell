@@ -26,7 +26,7 @@ std::string readline() {
 
     if (buffer != NULL) {
 
-      if (line.length() > 0) {
+      if (line.length() > 0 && line != ";") {
         line += "\n";
       }
 
@@ -34,7 +34,7 @@ std::string readline() {
       free(buffer);
     }
 
-  } while (line.length() < 1 || line.substr(line.length() - 1, line.length()) != ";");
+  } while (line.length() < 1 || (line.substr(line.length() - 1, line.length()) != ";" && line.substr(0, 1) != "\\"));
 
   ::add_history(line.c_str());
   return line;

@@ -37,6 +37,12 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     throw runtime_error("Not connected to any database!");
   }
 
+  if (query == "\\d" || query == "\\dt") {
+    query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema IN (SELECT current_schema()) ORDER BY table_name";
+  } else if (query.length() > 2 && query.substr(0, 3) == "\\d ") {
+    query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + query.substr(3) + "'";
+  }
+
   auto res = PQexec(_connection, query.c_str());
 
   if (PQresultStatus(res) != PGRES_TUPLES_OK) {
@@ -51,7 +57,24 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
   unique_ptr<table> result = unique_ptr<table>(new table());
 
   for (int i = 0; i < ncols; i++) {
-    result->add(PQfname(res, i));
+    alignment_type a = alignment_type::CENTER;
+    stringstream buffer;
+    buffer << PQfname(res, i);
+    Oid type = PQftype(res, i);
+
+    switch (type) {
+    case 23: // int4
+    case 1700: // numeric
+      a = alignment_type::RIGHT;
+      break;
+    case 1043: // varchar
+      a = alignment_type::LEFT;
+      break;
+    default:
+      buffer << " (unknown type = " << type << ")";
+    }
+
+    result->add(buffer.str(), a);
   }
 
   for (int i = 0; i < nrows; i++) {

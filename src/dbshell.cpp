@@ -96,9 +96,17 @@ int main(int argc, char** argv) {
 
   while (true) {
     line = readline();
-    line = line.substr(0, line.length() - 1);
 
-    if (line == "quit") {
+    if (line.substr(0, 1) != "\\") {
+      line = line.substr(0, line.length() - 1);
+    } else {
+
+      if (line.substr(line.length() - 1, line.length()) == ";") {
+        line = line.substr(0, line.length() - 1);
+      }
+    }
+
+    if (line == "quit" || line == "\\q") {
       break;
     }
 
