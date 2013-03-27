@@ -1,8 +1,10 @@
 #include "formatter.hpp"
 
 using std::string;
+using std::wstring;
 using std::vector;
 using std::stringstream;
+using std::wstringstream;
 using std::endl;
 
 namespace dbshell {
@@ -28,31 +30,31 @@ vector<uint> size(const vector<string>& header, const vector<vector<string>>& ro
   return sizes;
 }
 
-inline string fill(long ms) {
+inline wstring fill(long ms) {
 
   if (ms < 10) {
-    stringstream buffer;
-    buffer << "00" << ms;
+    wstringstream buffer;
+    buffer << L"00" << ms;
     return buffer.str();
   }
 
   if (ms < 100) {
-    stringstream buffer;
-    buffer << "0" << ms;
+    wstringstream buffer;
+    buffer << L"0" << ms;
     return buffer.str();
   }
 
-  stringstream buffer;
+  wstringstream buffer;
   buffer << ms;
   return buffer.str();
 }
 
-string format_duration(long ms) {
+wstring format_duration(long ms) {
   long s = ms / 1000;
   ms %= 1000;
 
   if (s == 0) {
-    stringstream buffer;
+    wstringstream buffer;
     buffer << ms << " ms";
     return buffer.str();
   }
@@ -61,8 +63,8 @@ string format_duration(long ms) {
   s %= 60;
 
   if (m == 0) {
-    stringstream buffer;
-    buffer << s << "." << fill(ms) << " s";
+    wstringstream buffer;
+    buffer << s << L"." << fill(ms) << L" s";
     return buffer.str();
   }
 
@@ -70,7 +72,7 @@ string format_duration(long ms) {
   m %= 60;
 
   if (h == 0) {
-    stringstream buffer;
+    wstringstream buffer;
     buffer << m << ":";
     if (s < 10) buffer << "0";
     buffer << s << " min";
@@ -81,7 +83,7 @@ string format_duration(long ms) {
   h %= 24;
 
   if (d == 0) {
-    stringstream buffer;
+    wstringstream buffer;
     buffer << h << ":";
     if (m < 10) buffer << "0";
     buffer << m << ":";
@@ -90,7 +92,7 @@ string format_duration(long ms) {
     return buffer.str();
   }
 
-  stringstream buffer;
+  wstringstream buffer;
   buffer << d << "d " << h << ":";
   if (m < 10) buffer << "0";
   buffer << m << ":";

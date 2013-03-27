@@ -12,6 +12,6 @@ std::string format_rows(const std::vector<std::vector<std::string>>& rows, const
 
 std::string format(const std::vector<std::string>& header, const std::vector<std::vector<std::string>>& rows);
 
-std::string format_duration(const long ms);
+std::wstring format_duration(const long ms);
 
 } /* namespace dbshell */

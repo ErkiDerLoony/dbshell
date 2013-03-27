@@ -44,7 +44,7 @@ public:
    * @param index  The index of the column to access.
    * @throws  If the given index is out of range.
    */
-  const std::string& column(const uint index) const throw(std::range_error);
+  const std::wstring& column(const uint index) const throw(std::range_error);
 
   /**
    * Access the paragraph alignment of some column of this table.
@@ -64,7 +64,7 @@ public:
    * @return  The alignment string of the specified column.
    * @throws  If the given index is out of range.
    */
-  const std::string& alignment_string(const uint index) const throw(std::range_error);
+  const std::wstring& alignment_string(const uint index) const throw(std::range_error);
 
   /**
    * Add a column to this table.
@@ -77,16 +77,16 @@ public:
    *                             output. The default value of '' (empty char)
    *                             means no special alignment.
    */
-  void add(std::string name,
+  void add(std::wstring name,
            alignment_type paragraph_alignment = alignment_type::LEFT,
-           std::string alignment_character = "");
+           std::wstring alignment_character = L"");
 
   /**
    * @copydoc add(std::string, alignment_type, std::string)
    */
-  void add_column(std::string name,
+  void add_column(std::wstring name,
                   alignment_type paragraph_alignment = alignment_type::LEFT,
-                  std::string alignment_character = "");
+                  std::wstring alignment_character = L"");
 
   /**
    * Add a row of data to this table.
@@ -95,7 +95,7 @@ public:
    * @throws  If the length of the given row of data does not match the number
    *          of columns of this table.
    */
-  void add(std::vector<std::string> row) throw(std::runtime_error);
+  void add(std::vector<std::wstring> row) throw(std::runtime_error);
 
   /**
    * Add a row of data to this table.
@@ -104,7 +104,7 @@ public:
    * @throws  If the length of the given row of data does not match the number
    *          of columns of this table.
    */
-  void add(std::initializer_list<std::string> row) throw(std::runtime_error);
+  void add(std::initializer_list<std::wstring> row) throw(std::runtime_error);
 
   /**
    * Access a row of data of this table.
@@ -113,7 +113,7 @@ public:
    * @return  The row of data at the specified position.
    * @throws  If the specified index is out of range for this table.
    */
-  const std::vector<std::string>& row(const uint index) const throw(std::range_error);
+  const std::vector<std::wstring>& row(const uint index) const throw(std::range_error);
 
   /**
    * Access a row of data of this table.
@@ -122,26 +122,26 @@ public:
    * @return  The row of data at the specified position.
    * @throws  If the specified index is out of range for this table.
    */
-  const std::vector<std::string>& operator[](const uint index) const throw(std::range_error);
+  const std::vector<std::wstring>& operator[](const uint index) const throw(std::range_error);
 
-  const std::vector<std::vector<std::string>>::const_iterator begin() const;
+  const std::vector<std::vector<std::wstring>>::const_iterator begin() const;
 
-  const std::vector<std::vector<std::string>>::const_iterator end() const;
+  const std::vector<std::vector<std::wstring>>::const_iterator end() const;
 
 private:
 
-  std::vector<std::string> _columns;
+  std::vector<std::wstring> _columns;
 
   std::vector<alignment_type> _alignments;
 
-  std::vector<std::string> _alignment_strings;
+  std::vector<std::wstring> _alignment_strings;
 
-  std::vector<std::vector<std::string>> _rows;
+  std::vector<std::vector<std::wstring>> _rows;
 
 };
 
 } /* namespace dbshell */
 
-std::ostream& operator<<(std::ostream& stream, const dbshell::table& table);
+std::wostream& operator<<(std::wostream& stream, const dbshell::table& table);
 
 #endif /* TABLE_HPP */

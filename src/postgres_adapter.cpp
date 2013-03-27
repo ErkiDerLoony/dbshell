@@ -5,8 +5,10 @@
 using std::pair;
 using std::vector;
 using std::string;
+using std::wstring;
 using std::runtime_error;
 using std::stringstream;
+using std::wstringstream;
 using std::unique_ptr;
 
 namespace dbshell {
@@ -57,7 +59,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
   unique_ptr<table> result = unique_ptr<table>(new table());
 
   for (int i = 0; i < ncols; i++) {
-    stringstream buffer;
+    wstringstream buffer;
     buffer << PQfname(res, i);
     Oid type = PQftype(res, i);
 
@@ -65,7 +67,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 20: // int8
     case 23: // int4
     case 1700: // numeric
-      result->add(buffer.str(), alignment_type::RIGHT, ".");
+      result->add(buffer.str(), alignment_type::RIGHT, L".");
       break;
     case 1043: // varchar
       result->add(buffer.str());
@@ -76,10 +78,13 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
   }
 
   for (int i = 0; i < nrows; i++) {
-    vector<string> row;
+    vector<wstring> row;
 
     for (int j = 0; j < ncols; j++) {
-      row.push_back(PQgetvalue(res, i, j));
+      char* buffer = PQgetvalue(res, i, j);
+      wchar_t wbuffer[1024];
+      std::mbstowcs(wbuffer, buffer, 1024);
+      row.push_back(wbuffer);
     }
 
     result->add(row);

@@ -18,7 +18,8 @@
 using namespace dbshell;
 using std::unique_ptr;
 using std::string;
-using std::cout;
+using std::wstring;
+using std::wcout;
 using std::cerr;
 using std::endl;
 using std::pair;
@@ -137,16 +138,18 @@ int main(int argc, char** argv) {
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
-      cout << *table << endl;
-      cout << table->rows() << " row";
-      if (table->rows() != 1) cout << "s";
-      cout << ", " << format_duration(diff) << endl;
+      wcout << *table << endl;
+      wcout << table->rows() << " row";
+      if (table->rows() != 1) wcout << "s";
+      wcout << L", "
+            << wstring(format_duration(diff).c_str())
+            << endl;
     } catch (runtime_error e) {
-      cout << e.what();
+      wcout << e.what();
     }
   }
 
-  cout << "Bye." << endl;
+  wcout << "Bye." << endl;
 
   return 0;
 }
