@@ -65,10 +65,12 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
 
     switch (type) {
     case 20: // int8
+    case 21: // int2
     case 23: // int4
     case 1700: // numeric
       result->add(buffer.str(), alignment_type::RIGHT, L".");
       break;
+    case 25: // text
     case 1043: // varchar
     case 1082: // date
       result->add(buffer.str());
