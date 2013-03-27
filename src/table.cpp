@@ -151,7 +151,7 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
         continue;
       }
 
-      const uint post = row[col].length() - row[col].find(anchor) - anchor.length();
+      uint post = row[col].length() - row[col].find(anchor) - anchor.length();
 
       if (pre > (*sizes)[col].pre) {
         (*sizes)[col].pre = pre;
@@ -220,8 +220,23 @@ void format_rows(ostream& stream, const table& table,
       }
 
       if (row[j].find(anchor) != string::npos) {
-        for (uint k = 0; k < size.pre - row[j].find(anchor); k++)
-          stream << " ";
+        if (anchor != "") {
+          for (uint k = 0; k < size.pre - row[j].find(anchor); k++)
+            stream << " ";
+        } else {
+          switch (table.alignment(j)) {
+          case alignment_type::LEFT:
+            break;
+          case alignment_type::CENTER:
+            for (uint k = 0; k < (size.sum - row[j].length()) / 2; k++)
+              stream << " ";
+            break;
+          case alignment_type::RIGHT:
+            for (uint k = 0; k < size.sum - row[j].length(); k++)
+              stream << " ";
+            break;
+          }
+        }
       } else {
         switch (table.alignment(j)) {
         case alignment_type::LEFT:
@@ -255,8 +270,23 @@ void format_rows(ostream& stream, const table& table,
       }
 
       if (row[j].find(anchor) != string::npos) {
-        for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++) {
-          stream << " ";
+        if (anchor != "") {
+          for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++)
+            stream << " ";
+        } else {
+          switch (table.alignment(j)) {
+          case alignment_type::LEFT:
+            for (uint k = 0; k < 1 + size.sum - row[j].length(); k++)
+              stream << " ";
+            break;
+          case alignment_type::CENTER:
+            for (uint k = 0; k < 1 + (size.sum - row[j].length() + 1) / 2; k++)
+              stream << " ";
+            break;
+          case alignment_type::RIGHT:
+            stream << " ";
+            break;
+          }
         }
       } else {
         switch (table.alignment(j)) {

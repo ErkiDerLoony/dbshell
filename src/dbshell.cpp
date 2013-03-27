@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   table t;
 
   t.add("text", alignment_type::LEFT);
-  t.add("long text column", alignment_type::RIGHT);
+  t.add("ttext column", alignment_type::RIGHT);
   t.add("value", alignment_type::LEFT, ".");
   t.add("vvalue column", alignment_type::RIGHT, ".");
 
