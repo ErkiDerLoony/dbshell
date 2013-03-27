@@ -146,12 +146,14 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
     for (uint col = 0; col < row.size(); col++) {
       const string anchor = table.alignment_string(col);
       auto pre = row[col].find(anchor);
+      uint post;
 
       if (pre == string::npos) {
-        continue;
+        pre = 0;
+        post = row[col].length();
+      } else {
+        post = row[col].length() - row[col].find(anchor) - anchor.length();
       }
-
-      uint post = row[col].length() - row[col].find(anchor) - anchor.length();
 
       if (pre > (*sizes)[col].pre) {
         (*sizes)[col].pre = pre;

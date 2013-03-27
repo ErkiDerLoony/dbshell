@@ -46,12 +46,12 @@ int main(int argc, char** argv) {
   t.add("text", alignment_type::LEFT);
   t.add("ttext column", alignment_type::RIGHT);
   t.add("value", alignment_type::LEFT, ".");
-  t.add("vvalue column", alignment_type::RIGHT, ".");
+  t.add("v", alignment_type::RIGHT, ".");
 
-  t.add({ "minuas a", "minus a", "-0.001", "-0.001" });
-  t.add({ "asdf", "kkk", "0.25", "0" });
-  t.add({ "fasas", "fasas", "0.2", "20" });
-  t.add({ "plas as", "plas a", "0.001", "100.001" });
+  t.add({ "minuas a", "minus a", "-0.001", "1400" });
+  t.add({ "asdf",     "kkkkkkkkk",      "0.25",  "3" });
+  t.add({ "fasas",    "fasas",    "2",   "20" });
+  t.add({ "plas as",  "plas a",   "0.001", "1" });
 
   cout << t << endl;
 

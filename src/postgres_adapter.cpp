@@ -57,8 +57,6 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
   unique_ptr<table> result = unique_ptr<table>(new table());
 
   for (int i = 0; i < ncols; i++) {
-    alignment_type alignment = alignment_type::CENTER;
-    string alignment_string = "";
     stringstream buffer;
     buffer << PQfname(res, i);
     Oid type = PQftype(res, i);
@@ -67,17 +65,14 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 20: // int8
     case 23: // int4
     case 1700: // numeric
-      alignment = alignment_type::RIGHT;
-      alignment_string = ".";
+      result->add(buffer.str(), alignment_type::RIGHT, ".");
       break;
     case 1043: // varchar
-      alignment = alignment_type::LEFT;
+      result->add(buffer.str());
       break;
     default:
       buffer << " (unknown type = " << type << ")";
     }
-
-    result->add(buffer.str(), alignment, alignment_string);
   }
 
   for (int i = 0; i < nrows; i++) {
