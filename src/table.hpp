@@ -44,7 +44,7 @@ public:
    * @param index  The index of the column to access.
    * @throws  If the given index is out of range.
    */
-  const std::string& column(uint index) const throw(std::range_error);
+  const std::string& column(const uint index) const throw(std::range_error);
 
   /**
    * Access the paragraph alignment of some column of this table.
@@ -55,7 +55,7 @@ public:
    *          right).
    * @throws  If the given index in out of range.
    */
-  const alignment_type& alignment(uint index) const throw(std::range_error);
+  const alignment_type& alignment(const uint index) const throw(std::range_error);
 
   /**
    * Access the alignment string of some column of this table.
@@ -64,7 +64,7 @@ public:
    * @return  The alignment string of the specified column.
    * @throws  If the given index is out of range.
    */
-  const std::string& alignment_string(uint index) const throw(std::range_error);
+  const std::string& alignment_string(const uint index) const throw(std::range_error);
 
   /**
    * Add a column to this table.
@@ -98,12 +98,35 @@ public:
   void add(std::vector<std::string> row) throw(std::runtime_error);
 
   /**
+   * Add a row of data to this table.
+   *
+   * @param row  The new row of data.
+   * @throws  If the length of the given row of data does not match the number
+   *          of columns of this table.
+   */
+  void add(std::initializer_list<std::string> row) throw(std::runtime_error);
+
+  /**
    * Access a row of data of this table.
    *
    * @param index  The index of the row to access.
-   * @return  This table’s rows of data.
+   * @return  The row of data at the specified position.
+   * @throws  If the specified index is out of range for this table.
    */
-  const std::vector<std::string>& row(uint index) const throw(std::range_error);
+  const std::vector<std::string>& row(const uint index) const throw(std::range_error);
+
+  /**
+   * Access a row of data of this table.
+   *
+   * @param index  The index of the row to access.
+   * @return  The row of data at the specified position.
+   * @throws  If the specified index is out of range for this table.
+   */
+  const std::vector<std::string>& operator[](const uint index) const throw(std::range_error);
+
+  const std::vector<std::vector<std::string>>::const_iterator begin() const;
+
+  const std::vector<std::vector<std::string>>::const_iterator end() const;
 
 private:
 

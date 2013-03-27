@@ -3,11 +3,15 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <tuple>
 
 using namespace dbshell;
+using std::initializer_list;
 using std::stringstream;
 using std::runtime_error;
 using std::range_error;
+using std::cout;
 using std::endl;
 using std::unique_ptr;
 using std::shared_ptr;
@@ -15,6 +19,7 @@ using std::string;
 using std::vector;
 using std::ostream;
 using std::tuple;
+using std::pair;
 using std::get;
 
 table::table() {
@@ -25,10 +30,6 @@ table::~table() {
 
 uint table::columns() const {
   return _columns.size();
-}
-
-uint table::rows() const {
-  return _rows.size();
 }
 
 const string& table::column(uint index) const throw(range_error) {
@@ -42,7 +43,33 @@ const string& table::column(uint index) const throw(range_error) {
   return _columns[index];
 }
 
-const alignment_type& table::alignment(uint index) const throw(range_error) {
+uint table::rows() const {
+  return _rows.size();
+}
+
+const vector<string>& table::row(const uint index) const throw(range_error) {
+
+  if (index >= rows()) {
+    stringstream buffer;
+    buffer << "No row with index " << index << "!";
+    throw range_error(buffer.str());
+  }
+
+  return _rows[index];
+}
+
+const vector<string>& table::operator[](const uint index) const throw(range_error) {
+
+  if (index >= rows()) {
+    stringstream buffer;
+    buffer << "No row with index " << index << "!";
+    throw range_error(buffer.str());
+  }
+
+  return _rows[index];
+}
+
+const alignment_type& table::alignment(const uint index) const throw(range_error) {
 
   if (index >= columns()) {
     stringstream buffer;
@@ -71,17 +98,6 @@ void table::add(string name, alignment_type alignment,
   _alignment_strings.push_back(alignment_string);
 }
 
-const vector<string>& table::row(uint index) const throw(range_error) {
-
-  if (index >= rows()) {
-    stringstream buffer;
-    buffer << "No row with index " << index << "!";
-    throw range_error(buffer.str());
-  }
-
-  return _rows[index];
-}
-
 void table::add(vector<string> row) throw(runtime_error) {
 
   if (row.size() != _columns.size()) {
@@ -91,41 +107,106 @@ void table::add(vector<string> row) throw(runtime_error) {
   _rows.push_back(row);
 }
 
-shared_ptr<vector<uint>> size(const table& table) {
-  shared_ptr<vector<uint>> sizes = shared_ptr<vector<uint>>(new vector<uint>());
+void table::add(initializer_list<string> row) throw(runtime_error) {
 
-  for (uint i = 0; i < table.columns(); i++) {
-    sizes->push_back(table.column(i).length());
+  if (row.size() != _columns.size()) {
+    throw runtime_error("Wrong number of entries for this table!");
   }
 
-  for (uint i = 0; i < table.rows(); i++) {
-    vector<string> row = table.row(i);
+  _rows.push_back(vector<string>(row));
+}
 
-    for (uint k = 0; k < row.size(); k++) {
-      const uint size = row[k].size();
+const vector<vector<string>>::const_iterator table::begin() const {
+  return _rows.begin();
+}
 
-      if (size > (*sizes)[k]) {
-        (*sizes)[k] = size;
+const vector<vector<string>>::const_iterator table::end() const {
+  return _rows.end();
+}
+
+struct size_type {
+  uint pre;
+  uint post;
+  uint sum;
+};
+
+shared_ptr<vector<size_type>> sizes(const table& table) {
+  const shared_ptr<vector<size_type>> sizes = shared_ptr<vector<size_type>>(new vector<size_type>());
+
+  for (uint col = 0; col < table.columns(); col++) {
+    size_type t;
+    t.pre = 0;
+    t.post = 0;
+    t.sum = 0;
+    sizes->push_back(t);
+  }
+
+  for (vector<string> row : table) {
+
+    for (uint col = 0; col < row.size(); col++) {
+      const string anchor = table.alignment_string(col);
+      const uint pre = row[col].find(anchor);
+      const uint post = row[col].length() - row[col].find(anchor) - anchor.length();
+
+      if (pre > (*sizes)[col].pre) {
+        (*sizes)[col].pre = pre;
+      }
+
+      if (post > (*sizes)[col].post) {
+        (*sizes)[col].post = post;
+      }
+    }
+  }
+
+  for (uint col = 0; col < table.columns(); col++) {
+    (*sizes)[col].sum = (*sizes)[col].pre + (*sizes)[col].post + table.alignment_string(col).length();
+  }
+
+  return sizes;
+}
+
+/*
+shared_ptr<vector<uint>> size(const table& table, const shared_ptr<vector<pair<uint, uint>>> sizes) {
+  const shared_ptr<vector<uint>> sizes = shared_ptr<vector<uint>>(new vector<uint>());
+
+  for (uint i = 0; i < table.columns(); i++) {
+    //sizes->push_back(table.column(i).length());
+    sizes->push_back(0);
+  }
+
+  for (vector<string> row : table) {
+
+    for (uint col = 0; col < row.size(); col++) {
+      string value = row[col];
+      string alignment_string = table.alignment_string(col);
+      
+      uint size = value.size();
+
+      if (size > (*sizes)[col]) {
+        (*sizes)[col] = size;
       }
     }
   }
 
   return sizes;
 }
+*/
 
-void format_header(ostream& stream, const table& table, const shared_ptr<vector<uint>> sizes) {
+void format_header(ostream& stream, const table& table,
+                   const shared_ptr<vector<size_type>> sizes) {
 
   for (uint i = 0; i < table.columns(); i++) {
     stream << "│ ";
+    size_type size = (*sizes)[i];
     string column = table.column(i);
 
-    for (uint k = 0; k < ((*sizes)[i] - column.length()) / 2; k++) {
+    for (uint k = 0; size.sum > column.length() && k < (size.sum - column.length()) / 2; k++) {
       stream << " ";
     }
 
     stream << column << " ";
 
-    for (uint k = 0; k < ((*sizes)[i] - column.length() + 1) / 2; k++) {
+    for (uint k = 0; size.sum > column.length() && k < (size.sum - column.length() + 1) / 2; k++) {
       stream << " ";
     }
   }
@@ -133,54 +214,56 @@ void format_header(ostream& stream, const table& table, const shared_ptr<vector<
   stream << "│" << endl;
 }
 
-void format_rows(ostream& stream, const table& table, const shared_ptr<vector<uint>> sizes) {
+void format_rows(ostream& stream, const table& table,
+                 const shared_ptr<vector<size_type>> sizes) {
 
   for (uint i = 0; i < table.rows(); i++) {
     vector<string> row = table.row(i);
 
     for (uint j = 0; j < row.size(); j++) {
-      stream << "│";
+      size_type size = (*sizes)[j];
+      string anchor = table.alignment_string(j);
+      string header = table.column(j);
+      stream << "│ ";
 
-      switch (table.alignment(j)) {
-      case alignment_type::LEFT:
+      if (header.length() > size.sum) {
+        switch (table.alignment(j)) {
+        case alignment_type::LEFT:
+          break;
+        case alignment_type::CENTER:
+          for (uint k = 0; k < (header.length() - size.sum) / 2; k++)
+            stream << " ";
+          break;
+        case alignment_type::RIGHT:
+          for (uint k = 0; k < header.length() - size.sum; k++)
+            stream << " ";
+          break;
+        }
+      }
+
+      for (uint k = 0; k < size.pre - row[j].find(anchor); k++) {
         stream << " ";
-        break;
-      case alignment_type::CENTER:
-
-        for (uint k = 0; k < 1 + ((*sizes)[j] - row[j].length() + 1) / 2; k++) {
-          stream << " ";
-        }
-
-        break;
-      case alignment_type::RIGHT:
-
-        for (uint k = 0; k < (*sizes)[j] - row[j].length() + 1; k++) {
-          stream << " ";
-        }
-
-        break;
       }
 
       stream << row[j];
 
-      switch (table.alignment(j)) {
-      case alignment_type::LEFT:
-
-        for (uint k = 0; k < (*sizes)[j] - row[j].length() + 1; k++) {
-          stream << " ";
+      if (header.length() > size.sum) {
+        switch (table.alignment(j)) {
+        case alignment_type::RIGHT:
+          break;
+        case alignment_type::CENTER:
+          for (uint k = 0; k < (header.length() - size.sum + 1) / 2; k++)
+            stream << " ";
+          break;
+        case alignment_type::LEFT:
+          for (uint k = 0; k < header.length() - size.sum; k++)
+            stream << " ";
+          break;
         }
+      }
 
-        break;
-      case alignment_type::CENTER:
-
-        for (uint k = 0; k < 1 + ((*sizes)[j] - row[j].length()) / 2; k++) {
-          stream << " ";
-        }
-
-        break;
-      case alignment_type::RIGHT:
+      for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++) {
         stream << " ";
-        break;
       }
     }
 
@@ -195,12 +278,25 @@ ostream& operator<<(ostream& stream, const table& table) {
     return stream;
   }
 
-  shared_ptr<vector<uint>> sizes = size(table);
+  shared_ptr<vector<size_type>> sizes = ::sizes(table);
+
+  stream << "sizes = [";
+
+  for (uint i = 0; i < sizes->size(); i++) {
+    stream << "(" << (*sizes)[i].pre << ", " << (*sizes)[i].post << ", " << (*sizes)[i].sum << ")";
+
+    if (i < sizes->size() - 1) {
+      stream << ", ";
+    } else {
+      stream << "]" << endl;
+    }
+  }
+
   stream << "┌";
 
   for (uint i = 0; i < sizes->size(); i++) {
 
-    for (uint k = 0; k < (*sizes)[i] + 2; k++) {
+    for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
       stream << "─";
     }
 
@@ -217,7 +313,7 @@ ostream& operator<<(ostream& stream, const table& table) {
 
   for (uint i = 0; i < sizes->size(); i++) {
 
-    for (uint k = 0; k < (*sizes)[i] + 2; k++) {
+    for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
       stream << "─";
     }
 
@@ -234,7 +330,7 @@ ostream& operator<<(ostream& stream, const table& table) {
 
   for (uint i = 0; i < sizes->size(); i++) {
 
-    for (uint k = 0; k < (*sizes)[i] + 2; k++) {
+    for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
       stream << "─";
     }
 
