@@ -145,7 +145,12 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
 
     for (uint col = 0; col < row.size(); col++) {
       const string anchor = table.alignment_string(col);
-      const uint pre = row[col].find(anchor);
+      auto pre = row[col].find(anchor);
+
+      if (pre == string::npos) {
+        continue;
+      }
+
       const uint post = row[col].length() - row[col].find(anchor) - anchor.length();
 
       if (pre > (*sizes)[col].pre) {
@@ -164,33 +169,6 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
 
   return sizes;
 }
-
-/*
-shared_ptr<vector<uint>> size(const table& table, const shared_ptr<vector<pair<uint, uint>>> sizes) {
-  const shared_ptr<vector<uint>> sizes = shared_ptr<vector<uint>>(new vector<uint>());
-
-  for (uint i = 0; i < table.columns(); i++) {
-    //sizes->push_back(table.column(i).length());
-    sizes->push_back(0);
-  }
-
-  for (vector<string> row : table) {
-
-    for (uint col = 0; col < row.size(); col++) {
-      string value = row[col];
-      string alignment_string = table.alignment_string(col);
-      
-      uint size = value.size();
-
-      if (size > (*sizes)[col]) {
-        (*sizes)[col] = size;
-      }
-    }
-  }
-
-  return sizes;
-}
-*/
 
 void format_header(ostream& stream, const table& table,
                    const shared_ptr<vector<size_type>> sizes) {
@@ -241,8 +219,22 @@ void format_rows(ostream& stream, const table& table,
         }
       }
 
-      for (uint k = 0; k < size.pre - row[j].find(anchor); k++) {
-        stream << " ";
+      if (row[j].find(anchor) != string::npos) {
+        for (uint k = 0; k < size.pre - row[j].find(anchor); k++)
+          stream << " ";
+      } else {
+        switch (table.alignment(j)) {
+        case alignment_type::LEFT:
+          break;
+        case alignment_type::CENTER:
+          for (uint k = 0; k < (size.sum - row[j].length()) / 2; k++)
+            stream << " ";
+          break;
+        case alignment_type::RIGHT:
+          for (uint k = 0; k < size.sum - row[j].length(); k++)
+            stream << " ";
+          break;
+        }
       }
 
       stream << row[j];
@@ -262,8 +254,24 @@ void format_rows(ostream& stream, const table& table,
         }
       }
 
-      for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++) {
-        stream << " ";
+      if (row[j].find(anchor) != string::npos) {
+        for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++) {
+          stream << " ";
+        }
+      } else {
+        switch (table.alignment(j)) {
+        case alignment_type::RIGHT:
+          stream << " ";
+          break;
+        case alignment_type::CENTER:
+          for (uint k = 0; k < 1 + (size.sum - row[j].length() + 1) / 2; k++)
+            stream << " ";
+          break;
+        case alignment_type::LEFT:
+          for (uint k = 0; k < 1 + size.sum - row[j].length(); k++)
+            stream << " ";
+          break;
+        }
       }
     }
 

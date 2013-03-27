@@ -43,14 +43,14 @@ void handler(int sig) {
 int main(int argc, char** argv) {
   table t;
 
-  t.add("text", alignment_type::RIGHT, "as");
-  t.add("long text column", alignment_type::RIGHT, "a");
+  t.add("text", alignment_type::LEFT);
+  t.add("long text column", alignment_type::RIGHT);
   t.add("value", alignment_type::LEFT, ".");
-  t.add("very long value column", alignment_type::RIGHT, ".");
+  t.add("vvalue column", alignment_type::RIGHT, ".");
 
   t.add({ "minuas a", "minus a", "-0.001", "-0.001" });
-  t.add({ "asdf", "asdf", "0.25", "0.24" });
-  t.add({ "fasas", "fasas", "0.2", "0.2" });
+  t.add({ "asdf", "kkk", "0.25", "0" });
+  t.add({ "fasas", "fasas", "0.2", "20" });
   t.add({ "plas as", "plas a", "0.001", "100.001" });
 
   cout << t << endl;
