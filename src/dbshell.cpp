@@ -41,19 +41,21 @@ void handler(int sig) {
 }
 
 int main(int argc, char** argv) {
+  /*
   table t;
 
   t.add("text", alignment_type::LEFT);
   t.add("ttext column", alignment_type::RIGHT);
-  t.add("value", alignment_type::LEFT, ".");
+  t.add("very long value column", alignment_type::RIGHT, ".");
   t.add("v", alignment_type::RIGHT, ".");
 
-  t.add({ "minuas a", "minus a", "-0.001", "1400" });
-  t.add({ "asdf",     "kkkkkkkkk",      "0.25",  "3" });
-  t.add({ "fasas",    "fasas",    "2",   "20" });
+  t.add({ "minuas a", "minus a", "-100.001", "1400" });
+  t.add({ "asdf",     "kkk",      "0.25",  "3" });
+  t.add({ "fasas",    "fasas",    "00000000000000",   "20" });
   t.add({ "plas as",  "plas a",   "0.001", "1" });
 
   cout << t << endl;
+  */
 
   if (argc < 2) {
     cerr << "You must specify a connection string on the command line!" << endl;

@@ -149,8 +149,8 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
       uint post;
 
       if (pre == string::npos) {
-        pre = 0;
-        post = row[col].length();
+        pre = (row[col].length() - anchor.length()) / 2;
+        post = (row[col].length() - anchor.length() + 1) / 2;
       } else {
         post = row[col].length() - row[col].find(anchor) - anchor.length();
       }
@@ -320,6 +320,7 @@ ostream& operator<<(ostream& stream, const table& table) {
 
   shared_ptr<vector<size_type>> sizes = ::sizes(table);
 
+  /*
   stream << "sizes = [";
 
   for (uint i = 0; i < sizes->size(); i++) {
@@ -331,6 +332,7 @@ ostream& operator<<(ostream& stream, const table& table) {
       stream << "]" << endl;
     }
   }
+  */
 
   stream << "┌";
 
