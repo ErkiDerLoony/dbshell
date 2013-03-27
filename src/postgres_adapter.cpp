@@ -70,10 +70,12 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       result->add(buffer.str(), alignment_type::RIGHT, L".");
       break;
     case 1043: // varchar
+    case 1082: // date
       result->add(buffer.str());
       break;
     default:
       buffer << " (unknown type = " << type << ")";
+      result->add(buffer.str());
     }
   }
 
