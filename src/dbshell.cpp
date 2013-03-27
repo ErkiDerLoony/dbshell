@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <memory>
 #include <vector>
+#include <locale>
 
 #include <signal.h>
 #include <sys/time.h>
@@ -42,20 +43,25 @@ void handler(int sig) {
 }
 
 int main(int argc, char** argv) {
+
+  // Fix io of UTF-8 characters.
+  std::ios_base::sync_with_stdio(false);
+  std::wcout.imbue(std::locale("en_US.UTF_8"));
+
   /*
   table t;
 
-  t.add("text", alignment_type::LEFT);
-  t.add("ttext column", alignment_type::RIGHT);
-  t.add("very long value column", alignment_type::RIGHT, ".");
-  t.add("v", alignment_type::RIGHT, ".");
+  t.add(L"text", alignment_type::LEFT);
+  t.add(L"ttext column", alignment_type::RIGHT);
+  t.add(L"veryßü „long“ value column", alignment_type::RIGHT, L".");
+  t.add(L"v", alignment_type::RIGHT, L".");
 
-  t.add({ "minuas a", "minus a", "-100.001", "1400" });
-  t.add({ "asdf",     "kkk",      "0.25",  "3" });
-  t.add({ "fasas",    "fasas",    "00000000000000",   "20" });
-  t.add({ "plas as",  "plas a",   "0.001", "1" });
+  t.add({ L"minuas a", L"minus a", L"-100.001", L"1400" });
+  t.add({ L"asdf",     L"kkk",      L"0.25",  L"3" });
+  t.add({ L"fasas",    L"fasas",    L"00000000000000",   L"20" });
+  t.add({ L"plas as",  L"plas a",   L"0.001", L"1" });
 
-  cout << t << endl;
+  wcout << t << endl;
   */
 
   if (argc < 2) {
@@ -145,7 +151,7 @@ int main(int argc, char** argv) {
             << wstring(format_duration(diff).c_str())
             << endl;
     } catch (runtime_error e) {
-      wcout << e.what();
+      wcout << e.what() << endl;
     }
   }
 

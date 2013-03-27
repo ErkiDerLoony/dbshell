@@ -107,7 +107,10 @@ void table::add(wstring name, alignment_type alignment,
 void table::add(vector<wstring> row) throw(runtime_error) {
 
   if (row.size() != _columns.size()) {
-    throw runtime_error("Wrong number of entries for this table!");
+    stringstream buffer;
+    buffer << "Wrong number of entries for this table (" << row.size()
+           << " entrie(s) vs. " << _columns.size() << " column(s))!";
+    throw runtime_error(buffer.str());
   }
 
   _rows.push_back(row);
@@ -116,7 +119,10 @@ void table::add(vector<wstring> row) throw(runtime_error) {
 void table::add(initializer_list<wstring> row) throw(runtime_error) {
 
   if (row.size() != _columns.size()) {
-    throw runtime_error("Wrong number of entries for this table!");
+    stringstream buffer;
+    buffer << "Wrong number of entries for this table (" << row.size()
+           << " entrie(s) vs. " << _columns.size() << " column(s))!";
+    throw runtime_error(buffer.str());
   }
 
   _rows.push_back(vector<wstring>(row));
@@ -182,7 +188,7 @@ void format_header(wostream& stream, const table& table,
                    const shared_ptr<vector<size_type>> sizes) {
 
   for (uint i = 0; i < table.columns(); i++) {
-    stream << "│ ";
+    stream << L"│ ";
     size_type size = (*sizes)[i];
     wstring column = table.column(i);
 
@@ -197,7 +203,7 @@ void format_header(wostream& stream, const table& table,
     }
   }
 
-  stream << "│" << endl;
+  stream << L"│" << endl;
 }
 
 void format_rows(wostream& stream, const table& table,
@@ -210,7 +216,7 @@ void format_rows(wostream& stream, const table& table,
       size_type size = (*sizes)[j];
       wstring anchor = table.alignment_string(j);
       wstring header = table.column(j);
-      stream << "│ ";
+      stream << L"│ ";
 
       if (header.length() > size.sum) {
         switch (table.alignment(j)) {
@@ -313,14 +319,14 @@ void format_rows(wostream& stream, const table& table,
       }
     }
 
-    stream << "│" << endl;
+    stream << L"│" << endl;
   }
 }
 
 wostream& operator<<(wostream& stream, const table& table) {
 
   if (table.columns() == 0) {
-    stream << "┌─┐" << endl << "│\u2205│" << endl << "└─┘";
+    stream << L"┌─┐" << endl << L"│\u2205│" << endl << L"└─┘";
     return stream;
   }
 
@@ -340,52 +346,52 @@ wostream& operator<<(wostream& stream, const table& table) {
   }
   */
 
-  stream << "┌";
+  stream << L"┌";
 
   for (uint i = 0; i < sizes->size(); i++) {
 
     for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
-      stream << "─";
+      stream << L"─";
     }
 
     if (i < sizes->size() - 1) {
-      stream << "┬";
+      stream << L"┬";
     } else {
-      stream << "┐" << endl;
+      stream << L"┐" << endl;
     }
   }
 
   format_header(stream, table, sizes);
 
-  stream << "├";
+  stream << L"├";
 
   for (uint i = 0; i < sizes->size(); i++) {
 
     for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
-      stream << "─";
+      stream << L"─";
     }
 
     if (i < sizes->size() - 1) {
-      stream << "┼";
+      stream << L"┼";
     } else {
-      stream << "┤" << endl;
+      stream << L"┤" << endl;
     }
   }
 
   format_rows(stream, table, sizes);
 
-  stream << "└";
+  stream << L"└";
 
   for (uint i = 0; i < sizes->size(); i++) {
 
     for (uint k = 0; k < (*sizes)[i].sum + 2 || k < table.column(i).length() + 2; k++) {
-      stream << "─";
+      stream << L"─";
     }
 
     if (i < sizes->size() - 1) {
-      stream << "┴";
+      stream << L"┴";
     } else {
-      stream << "┘";
+      stream << L"┘";
     }
   }
 
