@@ -142,8 +142,8 @@ struct size_type {
   uint sum;
 };
 
-shared_ptr<vector<size_type>> sizes(const table& table) {
-  const shared_ptr<vector<size_type>> sizes = shared_ptr<vector<size_type>>(new vector<size_type>());
+unique_ptr<vector<size_type>> sizes(const table& table) {
+  unique_ptr<vector<size_type>> sizes = unique_ptr<vector<size_type>>(new vector<size_type>());
 
   for (uint col = 0; col < table.columns(); col++) {
     size_type t;
@@ -185,11 +185,11 @@ shared_ptr<vector<size_type>> sizes(const table& table) {
 }
 
 void format_header(wostream& stream, const table& table,
-                   const shared_ptr<vector<size_type>> sizes) {
+                   const vector<size_type>& sizes) {
 
   for (uint i = 0; i < table.columns(); i++) {
     stream << L"│ ";
-    size_type size = (*sizes)[i];
+    size_type size = sizes[i];
     wstring column = table.column(i);
 
     for (uint k = 0; size.sum > column.length() && k < (size.sum - column.length()) / 2; k++) {
@@ -207,13 +207,13 @@ void format_header(wostream& stream, const table& table,
 }
 
 void format_rows(wostream& stream, const table& table,
-                 const shared_ptr<vector<size_type>> sizes) {
+                 const vector<size_type>& sizes) {
 
   for (uint i = 0; i < table.rows(); i++) {
     vector<wstring> row = table.row(i);
 
     for (uint j = 0; j < row.size(); j++) {
-      size_type size = (*sizes)[j];
+      size_type size = sizes[j];
       wstring anchor = table.alignment_string(j);
       wstring header = table.column(j);
       stream << L"│ ";
@@ -330,7 +330,7 @@ wostream& operator<<(wostream& stream, const table& table) {
     return stream;
   }
 
-  shared_ptr<vector<size_type>> sizes = ::sizes(table);
+  unique_ptr<vector<size_type>> sizes = ::sizes(table);
 
   /*
   stream << "sizes = [";
@@ -361,7 +361,7 @@ wostream& operator<<(wostream& stream, const table& table) {
     }
   }
 
-  format_header(stream, table, sizes);
+  format_header(stream, table, *sizes);
 
   stream << L"├";
 
@@ -378,7 +378,7 @@ wostream& operator<<(wostream& stream, const table& table) {
     }
   }
 
-  format_rows(stream, table, sizes);
+  format_rows(stream, table, *sizes);
 
   stream << L"└";
 
