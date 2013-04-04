@@ -14,6 +14,12 @@ class db_adapter {
 public:
 
   /**
+   * Dummy destructor to prevent memory leaks (nothing is allocated in this
+   * purely abstract class and thus nothing has to be released).
+   */
+  virtual ~db_adapter() {}
+
+  /**
    * Execute a query on this connection.
    *
    * @param query  The query string.

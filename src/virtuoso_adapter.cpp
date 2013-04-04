@@ -22,7 +22,8 @@ virtuoso_adapter::~virtuoso_adapter() {
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (std::runtime_error) {
-  return unique_ptr<table>(new table());
+  unique_ptr<table> table(unique_ptr<dbshell::table>(new dbshell::table()));
+  return table;
 }
 
 void virtuoso_adapter::cancel() {

@@ -49,6 +49,9 @@ int main(int argc, char** argv) {
   std::wcout.imbue(std::locale("en_US.UTF_8"));
 
   /*
+
+  // Test case for table
+
   table t;
 
   t.add(L"text", alignment_type::LEFT);
