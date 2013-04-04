@@ -1,4 +1,5 @@
 #include "virtuoso_adapter.hpp"
+#include "virtuoso_defines.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -107,8 +108,133 @@ virtuoso_adapter::~virtuoso_adapter() {
   cout << "Virtuoso adapter destroyed." << endl;
 }
 
-unique_ptr<table> virtuoso_adapter::query(string query) throw (std::runtime_error) {
+unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   unique_ptr<table> table(unique_ptr<dbshell::table>(new dbshell::table()));
+
+  if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
+    throw runtime_error("Error executing query!");
+  }
+
+  char fetchBuffer[1000];
+  short numCols = 0;
+  short colNum;
+  SQLLEN colIndicator;
+  UDWORD totalRows;
+  UDWORD totalSets;
+  SQLHANDLE hdesc = SQL_NULL_HANDLE;
+  SQLRETURN rc;
+
+  totalSets = 0;
+
+  do {
+    rc = SQLNumResultCols (statement, &numCols);
+
+    if (!SQL_SUCCEEDED (rc)) {
+      SQLCloseCursor(statement);
+      throw runtime_error("Could not get number of result columns!");
+    }
+
+    if (numCols == 0) {
+      cout << "Statement executed." << endl;
+      return table;
+    }
+
+    totalRows = 0;
+
+    while (1) {
+      rc = SQLFetch(statement);
+
+      if (rc == SQL_NO_DATA_FOUND) {
+        break;
+      }
+
+      if (!SQL_SUCCEEDED(rc)) {
+        SQLCloseCursor(statement);
+        throw runtime_error("Could not fetch any data!");
+      }
+
+      for (colNum = 1; colNum <= numCols; colNum++) {
+        char buf[1000];
+        SQLINTEGER len;
+        int flag, dvtype;
+
+        rc = SQLGetData(statement, colNum, SQL_C_CHAR, fetchBuffer, sizeof(fetchBuffer), &colIndicator);
+
+        if (!SQL_SUCCEEDED (rc)) {
+          SQLCloseCursor(statement);
+          throw runtime_error("Could not get column data!");
+        }
+
+        rc = SQLGetStmtAttr(statement, SQL_ATTR_IMP_ROW_DESC, &hdesc, SQL_IS_POINTER, NULL);
+
+        if (!SQL_SUCCEEDED (rc)) {
+          SQLCloseCursor(statement);
+          throw runtime_error("Could not create column attribute handle!");
+        }
+
+        rc = SQLGetDescField (hdesc, colNum, SQL_DESC_COL_DV_TYPE, &dvtype, SQL_IS_INTEGER, NULL);
+
+        if (!SQL_SUCCEEDED (rc)) {
+          SQLCloseCursor(statement);
+          throw runtime_error("Could not get column data type!");
+        }
+
+        rc = SQLGetDescField (hdesc, colNum, SQL_DESC_COL_BOX_FLAGS, &flag, SQL_IS_INTEGER, NULL);
+
+        if (!SQL_SUCCEEDED (rc)) {
+          SQLCloseCursor(statement);
+          throw runtime_error("Could not get column flags!");
+        }
+
+        if (colIndicator == SQL_NULL_DATA) {
+          printf ("NULL");
+        } else {
+
+          if (flag & VIRTUOSO_BF_IRI)
+            printf ("<%s>", fetchBuffer); /* IRI */
+          else if (dvtype == VIRTUOSO_DV_STRING || dvtype == VIRTUOSO_DV_RDF)
+            printf ("\"%s\"", fetchBuffer); /* literal string */
+          else
+            printf ("%s", fetchBuffer); /* value */
+
+          if (dvtype == VIRTUOSO_DV_RDF) {
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_LANG, buf, sizeof (buf), &len);
+
+            if (!SQL_SUCCEEDED(rc)) {
+              SQLCloseCursor(statement);
+              throw runtime_error("Could not get literal language!");
+            }
+
+            if (len) {
+              printf ("@%.*s", (int) len, buf);
+            }
+
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_TYPE, buf, sizeof (buf), &len);
+
+            if (!SQL_SUCCEEDED (rc)) {
+              SQLCloseCursor(statement);
+              throw runtime_error("Could not get literal type!");
+            }
+
+            if (len) {
+              printf ("^^<%.*s>", (int) len, buf);
+            }
+          }
+
+          if (colNum < numCols) {
+            putchar (' ');
+          }
+        }
+      }
+
+      printf (" .\n");
+      totalRows++;
+    }
+
+    printf ("\n\nStatement returned %lu rows.\n", totalRows);
+    totalSets++;
+  } while (SQLMoreResults(statement) == SQL_SUCCESS);
+
   return table;
 }
 
