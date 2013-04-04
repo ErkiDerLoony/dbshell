@@ -33,9 +33,7 @@ public:
 
 private:
 
-  void error() throw(std::runtime_error);
-
-  SQLHENV environment;
+  SQLHANDLE environment;
   SQLHDBC connection;
   SQLHSTMT statement;
 
