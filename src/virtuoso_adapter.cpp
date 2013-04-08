@@ -1,5 +1,6 @@
 #include "virtuoso_adapter.hpp"
 #include "virtuoso_defines.hpp"
+#include "log.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -43,7 +44,7 @@ unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
 }
 
 virtuoso_adapter::virtuoso_adapter(std::string host, std::string username) throw(runtime_error) {
-  cout << "Creating virtuoso adapter." << endl;
+  log::info << "Creating virtuoso adapter." << endl;
   cout << "Allocating environment." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment))) {
@@ -231,7 +232,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       totalRows++;
     }
 
-    printf ("\n\nStatement returned %lu rows.\n", totalRows);
+    printf ("\n\nStatement returned %du rows.\n", totalRows);
     totalSets++;
   } while (SQLMoreResults(statement) == SQL_SUCCESS);
 
