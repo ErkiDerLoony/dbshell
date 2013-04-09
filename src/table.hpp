@@ -116,6 +116,26 @@ public:
   const std::vector<std::wstring>& row(const uint index) const throw(std::range_error);
 
   /**
+   * Access a cell of this table.
+   *
+   * @param row  The row index of the cell to access.
+   * @param col  The column index of the cell to access.
+   * @return  The value of this table at the specified position.
+   * @throws  If the specified indices are invalid for this table.
+   */
+  std::wstring get(const uint row, const uint col) const throw(std::range_error);
+
+  /**
+   * Change a value of this table.
+   *
+   * @param row  The row index of the cell to update.
+   * @param col  The column index of the cell to update.
+   * @param value  The new value for the specified cell.
+   * @throws  If one of the specified indices in out of range for this table.
+   */
+  void set(const uint row, const uint col, const std::wstring value) throw(std::range_error);
+
+  /**
    * Access a row of data of this table.
    *
    * @param index  The index of the row to access.

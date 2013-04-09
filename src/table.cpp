@@ -128,6 +128,24 @@ void table::add(initializer_list<wstring> row) throw(runtime_error) {
   _rows.push_back(vector<wstring>(row));
 }
 
+wstring table::get(const uint row, const uint col) const throw(range_error) {
+
+  if (row < 0 || row > _rows.size() || col < 0 || col > _columns.size()) {
+    throw range_error("Invalid indices!");
+  }
+
+  return _rows[row][col];
+}
+
+void table::set(const uint row, const uint col, const wstring value) throw(range_error) {
+
+  if (row < 0 || row > _rows.size() || col < 0 || col > _columns.size()) {
+    throw range_error("Invalid indices!");
+  }
+
+  _rows[row][col] = value;
+}
+
 const vector<vector<wstring>>::const_iterator table::begin() const {
   return _rows.begin();
 }

@@ -14,6 +14,7 @@ using std::unique_ptr;
 using std::string;
 using std::wstring;
 using std::cerr;
+using std::wcout;
 using std::cout;
 using std::endl;
 using std::vector;
@@ -113,6 +114,11 @@ virtuoso_adapter::~virtuoso_adapter() {
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
+
+  if (query == "\\p" || query == "prefixes") {
+    return _prefixes.format_as_table();
+  }
+
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
@@ -250,6 +256,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     totalSets++;
   } while (SQLMoreResults(statement) == SQL_SUCCESS);
 
+  _prefixes.prefix(*table);
   return table;
 }
 
@@ -260,8 +267,7 @@ void virtuoso_adapter::cancel() {
     SQLRETURN result = SQLCancel(statement);
 
     if (!SQL_SUCCEEDED(result)) {
-      stringstream buffer;
-      buffer << "Query could not be cancelled";
+      cout << "Query could not be cancelled!" << endl;
 
       int index = 1;
       SQLCHAR state[5];
@@ -276,22 +282,10 @@ void virtuoso_adapter::cancel() {
           break;
         }
 
-        if (index == 2) {
-          buffer << " (";
-        } else {
-          buffer << "; ";
-        }
-
-        buffer << state << " " << text << ", native error code " << native;
+        cout << state << " " << text << " (native error code " << native << ")" << endl;
       }
 
-      if (index == 2) {
-        buffer << "!";
-      } else {
-        buffer << ")!";
-      }
-
-      cout << buffer.str() << endl;
+      cout << "Please be patient." << endl;
     } else {
       cout << "Query cancelled." << endl;
     }

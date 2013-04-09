@@ -2,6 +2,7 @@
 #define VIRTUOSO_ADAPTER_HPP
 
 #include "db_adapter.hpp"
+#include "prefixes.hpp"
 
 #include <sql.h>
 
@@ -36,6 +37,8 @@ private:
   SQLHANDLE environment = SQL_NULL_HANDLE;
   SQLHANDLE connection = SQL_NULL_HANDLE;
   SQLHANDLE statement = SQL_NULL_HANDLE;
+
+  prefixes _prefixes;
 
   /**
    * Try to read the password for a user from ~/.vtpass (similar to PostgreSQL’s
