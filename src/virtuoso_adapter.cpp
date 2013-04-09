@@ -19,6 +19,7 @@ using std::endl;
 using std::vector;
 using std::runtime_error;
 using std::wstringstream;
+using std::stringstream;
 using std::ifstream;
 
 unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
@@ -253,4 +254,46 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 }
 
 void virtuoso_adapter::cancel() {
+
+  if (statement) {
+    cout << "Cancelling query." << endl;
+    SQLRETURN result = SQLCancel(statement);
+
+    if (!SQL_SUCCEEDED(result)) {
+      stringstream buffer;
+      buffer << "Query could not be cancelled";
+
+      int index = 1;
+      SQLCHAR state[5];
+      SQLINTEGER native;
+      SQLCHAR text[1000];
+      SQLSMALLINT length;
+
+      while (true) {
+        result = SQLGetDiagRec(SQL_HANDLE_STMT, statement, index++, state, &native, text, sizeof(text), &length);
+
+        if (!SQL_SUCCEEDED(result)) {
+          break;
+        }
+
+        if (index == 2) {
+          buffer << " (";
+        } else {
+          buffer << "; ";
+        }
+
+        buffer << state << " " << text << ", native error code " << native;
+      }
+
+      if (index == 2) {
+        buffer << "!";
+      } else {
+        buffer << ")!";
+      }
+
+      cout << buffer.str() << endl;
+    } else {
+      cout << "Query cancelled." << endl;
+    }
+  }
 }
