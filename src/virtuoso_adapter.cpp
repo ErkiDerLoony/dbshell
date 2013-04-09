@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 #include <sql.h>
 #include <sqlext.h>
@@ -11,11 +12,13 @@
 using namespace dbshell;
 using std::unique_ptr;
 using std::string;
+using std::wstring;
 using std::cerr;
 using std::cout;
 using std::endl;
+using std::vector;
 using std::runtime_error;
-using std::stringstream;
+using std::wstringstream;
 using std::ifstream;
 
 unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
@@ -109,7 +112,7 @@ virtuoso_adapter::~virtuoso_adapter() {
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
-  unique_ptr<table> table(unique_ptr<dbshell::table>(new dbshell::table()));
+  unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
     throw runtime_error("Error executing query!");
@@ -119,7 +122,6 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   short numCols = 0;
   short colNum;
   SQLLEN colIndicator;
-  UDWORD totalRows;
   UDWORD totalSets;
   SQLHANDLE hdesc = SQL_NULL_HANDLE;
   SQLRETURN rc;
@@ -135,11 +137,23 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     }
 
     if (numCols == 0) {
-      cout << "Statement executed." << endl;
       return table;
     }
 
-    totalRows = 0;
+    for (int col = 1; col <= numCols; col++) {
+      wchar_t buffer[1000];
+      SQLSMALLINT length;
+      SQLLEN flag = 0;
+
+      rc = SQLColAttributeW(statement, col, SQL_DESC_NAME, buffer, 1000, &length, &flag);
+
+      if (!SQL_SUCCEEDED(rc)) {
+        SQLCloseCursor(statement);
+        throw runtime_error("Could not find out column name!");
+      }
+
+      table->add_column(buffer);
+    }
 
     while (1) {
       rc = SQLFetch(statement);
@@ -152,6 +166,8 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
         SQLCloseCursor(statement);
         throw runtime_error("Could not fetch any data!");
       }
+
+      vector<wstring> row;
 
       for (colNum = 1; colNum <= numCols; colNum++) {
         char buf[1000];
@@ -187,18 +203,20 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
         }
 
         if (colIndicator == SQL_NULL_DATA) {
-          printf ("NULL");
+          row.push_back(L"");
         } else {
+          wstringstream cell;
 
-          if (flag & VIRTUOSO_BF_IRI)
-            printf ("<%s>", fetchBuffer); /* IRI */
-          else if (dvtype == VIRTUOSO_DV_STRING || dvtype == VIRTUOSO_DV_RDF)
-            printf ("\"%s\"", fetchBuffer); /* literal string */
-          else
-            printf ("%s", fetchBuffer); /* value */
+          if (flag & VIRTUOSO_BF_IRI) {
+            cell << "<" << fetchBuffer << ">";
+          } else if (dvtype == VIRTUOSO_DV_STRING || dvtype == VIRTUOSO_DV_RDF) {
+            cell << "\"" << fetchBuffer << "\"";
+          } else {
+            cell << fetchBuffer;
+          }
 
           if (dvtype == VIRTUOSO_DV_RDF) {
-            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_LANG, buf, sizeof (buf), &len);
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_LANG, buf, sizeof(buf), &len);
 
             if (!SQL_SUCCEEDED(rc)) {
               SQLCloseCursor(statement);
@@ -206,10 +224,10 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
             }
 
             if (len) {
-              printf ("@%.*s", (int) len, buf);
+              cell << "@" << buf;
             }
 
-            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_TYPE, buf, sizeof (buf), &len);
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_TYPE, buf, sizeof(buf), &len);
 
             if (!SQL_SUCCEEDED (rc)) {
               SQLCloseCursor(statement);
@@ -217,21 +235,17 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
             }
 
             if (len) {
-              printf ("^^<%.*s>", (int) len, buf);
+              cell << "^^" << buf;
             }
           }
 
-          if (colNum < numCols) {
-            putchar (' ');
-          }
+          row.push_back(cell.str());
         }
       }
 
-      printf (" .\n");
-      totalRows++;
+      table->add(row);
     }
 
-    printf ("\n\nStatement returned %lu rows.\n", totalRows);
     totalSets++;
   } while (SQLMoreResults(statement) == SQL_SUCCESS);
 
