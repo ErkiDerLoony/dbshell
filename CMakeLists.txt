@@ -23,3 +23,6 @@ if (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 add_subdirectory(src)
+
+include_directories(src)
+add_subdirectory(test)
