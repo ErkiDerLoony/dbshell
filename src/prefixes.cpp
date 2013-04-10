@@ -13,6 +13,12 @@ using std::unique_ptr;
 
 prefixes::prefixes() {
   _prefixes.insert(pair<wstring, wstring>(L"rdf:", L"http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+  _prefixes.insert(pair<wstring, wstring>(L"rdfs:", L"http://www.w3.org/2000/01/rdf-schema#"));
+  _prefixes.insert(pair<wstring, wstring>(L"xsd:", L"http://www.w3.org/2001/XMLSchema#"));
+  _prefixes.insert(pair<wstring, wstring>(L"dc:", L"http://purl.org/dc/terms/"));
+  _prefixes.insert(pair<wstring, wstring>(L"owl:", L"http://www.w3.org/2002/07/owl#"));
+  _prefixes.insert(pair<wstring, wstring>(L"dbpedia:", L"http://dbpedia.org/"));
+  _prefixes.insert(pair<wstring, wstring>(L"de.dbpedia:", L"http://de.dbpedia.org/"));
 }
 
 prefixes::~prefixes() {
