@@ -1,7 +1,10 @@
 #include "postgres_adapter.hpp"
 
 #include <sstream>
+#include <iostream>
 
+using std::cout;
+using std::endl;
 using std::pair;
 using std::vector;
 using std::string;
@@ -15,6 +18,7 @@ namespace dbshell {
 
 postgres_adapter::postgres_adapter(string host, string username, string database) throw(runtime_error)
   : _connection(nullptr), _host(host), _username(username), _database(database) {
+  cout << "Connecting to " << database << " on " << host << "." << endl;
   stringstream info;
   info << "host=" << _host << " user=" << _username << " dbname=" << _database;
   _connection = PQconnectdb(info.str().c_str());
@@ -69,6 +73,9 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 23: // int4
     case 1700: // numeric
       result->add(buffer.str(), alignment_type::RIGHT, L".");
+      break;
+    case 16: // bool
+      result->add(buffer.str(), alignment_type::CENTER);
       break;
     case 25: // text
     case 1043: // varchar
