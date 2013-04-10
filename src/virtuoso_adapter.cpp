@@ -123,6 +123,12 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     return _prefixes.format_as_table();
   }
 
+  string prefix = query.substr(0, 6);
+
+  if (prefix != "sparql" && prefix != "SPARQL" && prefix != "Sparql") {
+    query = "SPARQL " + query;
+  }
+
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
