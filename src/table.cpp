@@ -180,8 +180,15 @@ unique_ptr<vector<size_type>> sizes(const table& table) {
       uint post;
 
       if (pre == string::npos) {
-        pre = (row[col].length() - anchor.length()) / 2;
-        post = (row[col].length() - anchor.length() + 1) / 2;
+
+        if (row[col].length() > anchor.length()) {
+          pre = (row[col].length() - anchor.length()) / 2;
+          post = (row[col].length() - anchor.length() + 1) / 2;
+        } else {
+          pre = row[col].length() / 2;
+          post = (row[col].length() + 1) / 2;
+        }
+
       } else {
         post = row[col].length() - row[col].find(anchor) - anchor.length();
       }
