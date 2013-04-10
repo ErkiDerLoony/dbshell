@@ -165,7 +165,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       SQLSMALLINT length;
       SQLLEN flag = 0;
 
-      rc = SQLColAttribute(statement, col, SQL_DESC_NAME, buffer, 1000, &length, &flag);
+      rc = SQLColAttributeW(statement, col, SQL_DESC_NAME, buffer, 1000, &length, &flag);
 
       if (!SQL_SUCCEEDED(rc)) {
         SQLCloseCursor(statement);
