@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <cstdio>
 
 #include <sql.h>
 #include <sqlext.h>
@@ -14,6 +15,7 @@ using namespace dbshell;
 using std::unique_ptr;
 using std::string;
 using std::wstring;
+using std::cin;
 using std::cerr;
 using std::wcout;
 using std::cout;
@@ -49,48 +51,35 @@ unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
 }
 
 virtuoso_adapter::virtuoso_adapter(string dsn, string username) throw(runtime_error) {
-  cout << "Creating virtuoso adapter." << endl;
-  cout << "Allocating environment." << endl;
+  cout << "Connecting to " << dsn << "." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment))) {
     throw runtime_error("Error creating environment!");
   }
 
-  cout << "Adapting ODBC version." << endl;
-
   if (!SQL_SUCCEEDED(SQLSetEnvAttr(environment, SQL_ATTR_ODBC_VERSION, (void *) SQL_OV_ODBC3, 0))) {
     throw runtime_error("Error setting ODBC version!");
   }
-
-  cout << "Creating connection handle." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_DBC, environment, &connection))) {
     throw runtime_error("Error creating connection!");
   }
 
-  cout << "Loading password." << endl;
   unique_ptr<string> pointer = pwd(username);
-  stringstream password;
+  string password;
+  vector<char> buffer;
 
   if (pointer == nullptr) {
-    cout << "WARNING: No password for user »" << username << "« found in ~/.vtpass, this will likely NOT work!" << endl;
+    cerr << "WARNING: No password found in ~/.vtpass! This will likely not work!" << endl;
+    password = "";
   } else {
-
-    for (uint i = 0; i < pointer->length(); i++) {
-      password << "*";
-    }
-
-    cout << "Got password »" << password.str() << "«." << endl;
+    password = *pointer;
   }
-
-  cout << "Connecting to data source »" << dsn << "«." << endl;
 
   if (!SQL_SUCCEEDED(SQLConnect(connection, (SQLCHAR*) dsn.c_str(), SQL_NTS, (SQLCHAR*) username.c_str(),
-                                SQL_NTS, (SQLCHAR*) pointer->c_str(), SQL_NTS))) {
+                                SQL_NTS, (SQLCHAR*) password.c_str(), SQL_NTS))) {
     throw runtime_error("Error connecting to data source!");
   }
-
-  cout << "Allocating statement." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_STMT, connection, &statement))) {
     throw runtime_error("Error allocating statement!");
@@ -100,22 +89,17 @@ virtuoso_adapter::virtuoso_adapter(string dsn, string username) throw(runtime_er
 virtuoso_adapter::~virtuoso_adapter() {
 
   if (statement) {
-    cout << "Releasing statement." << endl;
     SQLFreeHandle(SQL_HANDLE_STMT, statement);
   }
 
   if (connection) {
-    cout << "Disconnecting and releasing connection." << endl;
     SQLDisconnect(connection);
     SQLFreeHandle(SQL_HANDLE_DBC, connection);
   }
 
   if (environment) {
-    cout << "Releasing environment." << endl;
     SQLFreeHandle(SQL_HANDLE_ENV, environment);
   }
-
-  cout << "Virtuoso adapter destroyed." << endl;
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
@@ -190,8 +174,6 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       vector<wstring> row;
 
       for (colNum = 1; colNum <= numCols; colNum++) {
-        wchar_t buf[2048];
-        SQLINTEGER len;
         int flag, dvtype;
 
         rc = SQLGetData(statement, colNum, SQL_C_WCHAR, fetchBuffer, sizeof(fetchBuffer), &colIndicator);
@@ -236,7 +218,9 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
           }
 
           if (dvtype == VIRTUOSO_DV_RDF) {
-            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_LANG, buf, sizeof(buf), &len);
+            char buff[2048];
+            SQLINTEGER len;
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_LANG, buff, sizeof(buff), &len);
 
             if (!SQL_SUCCEEDED(rc)) {
               SQLCloseCursor(statement);
@@ -244,18 +228,20 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
             }
 
             if (len) {
-              cell << "@" << buf;
+              cell << "@" << buff;
             }
 
-            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_TYPE, buf, sizeof(buf), &len);
+            rc = SQLGetDescField(hdesc, colNum, SQL_DESC_COL_LITERAL_TYPE, buff, sizeof(buff), &len);
 
-            if (!SQL_SUCCEEDED (rc)) {
+            if (!SQL_SUCCEEDED(rc)) {
               SQLCloseCursor(statement);
               throw runtime_error("Could not get literal type!");
             }
 
             if (len) {
-              cell << "^^" << buf;
+              string suffix(buff);
+              suffix = _prefixes.prefix(suffix);
+              cell << "^^" << suffix.c_str();
             }
           }
 

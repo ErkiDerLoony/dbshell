@@ -38,6 +38,15 @@ public:
   virtual void prefix(table& t) const;
 
   /**
+   * Apply this prefix map to one value.
+   *
+   * @param t  The value that shall be prefixed.
+   * @return  The prefixed value which may equal the specified value if no
+   *          prefix of this mapping applied.
+   */
+  virtual std::string prefix(const std::string& t) const;
+
+  /**
    * Format this mapping’s prefixes ready for inclusion in SPARQL queries.
    *
    * @return  A string that contains this mapping’s prefixes formatted like

@@ -50,6 +50,23 @@ void prefixes::prefix(dbshell::table& t) const {
   }
 }
 
+string prefixes::prefix(const string& t) const {
+  std::cout << "Prefixing »" << t << "«." << std::endl;
+
+  for (pair<string, string> prefix : _prefixes) {
+
+    if (t.substr(0, prefix.second.length()) == prefix.second) {
+      stringstream updated;
+      updated << prefix.first.c_str()
+              << t.substr(prefix.second.length(),
+                          t.length() - prefix.second.length());
+      return updated.str();
+    }
+  }
+
+  return t;
+}
+
 string prefixes::format() const {
   stringstream result;
   bool first = true;
