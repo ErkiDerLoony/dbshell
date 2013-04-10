@@ -11,6 +11,7 @@ using std::initializer_list;
 using std::stringstream;
 using std::runtime_error;
 using std::range_error;
+using std::wcout;
 using std::cout;
 using std::endl;
 using std::unique_ptr;
@@ -211,13 +212,13 @@ void format_header(wostream& stream, const table& table,
     wstring column = table.column(i);
 
     for (uint k = 0; size.sum > column.length() && k < (size.sum - column.length()) / 2; k++) {
-      stream << " ";
+      stream << L" ";
     }
 
-    stream << column << " ";
+    stream << column << L" ";
 
     for (uint k = 0; size.sum > column.length() && k < (size.sum - column.length() + 1) / 2; k++) {
-      stream << " ";
+      stream << L" ";
     }
   }
 
@@ -231,10 +232,14 @@ void format_rows(wostream& stream, const table& table,
     vector<wstring> row = table.row(i);
 
     for (uint j = 0; j < row.size(); j++) {
+      wcout << L"MARK0" << endl;
       size_type size = sizes[j];
+      wcout << L"MARK1" << endl;
       wstring anchor = table.alignment_string(j);
+      wcout << L"MARK2" << endl;
       wstring header = table.column(j);
       stream << L"│ ";
+      wcout << L"MARK3" << endl;
 
       if (header.length() > size.sum) {
         switch (table.alignment(j)) {
@@ -242,30 +247,32 @@ void format_rows(wostream& stream, const table& table,
           break;
         case alignment_type::CENTER:
           for (uint k = 0; k < (header.length() - size.sum) / 2; k++)
-            stream << " ";
+            stream << L" ";
           break;
         case alignment_type::RIGHT:
           for (uint k = 0; k < header.length() - size.sum; k++)
-            stream << " ";
+            stream << L" ";
           break;
         }
       }
 
+      wcout << L"MARK4" << endl;
+
       if (row[j].find(anchor) != string::npos) {
         if (anchor != L"") {
           for (uint k = 0; k < size.pre - row[j].find(anchor); k++)
-            stream << " ";
+            stream << L" ";
         } else {
           switch (table.alignment(j)) {
           case alignment_type::LEFT:
             break;
           case alignment_type::CENTER:
             for (uint k = 0; k < (size.sum - row[j].length()) / 2; k++)
-              stream << " ";
+              stream << L" ";
             break;
           case alignment_type::RIGHT:
             for (uint k = 0; k < size.sum - row[j].length(); k++)
-              stream << " ";
+              stream << L" ";
             break;
           }
         }
@@ -275,15 +282,29 @@ void format_rows(wostream& stream, const table& table,
           break;
         case alignment_type::CENTER:
           for (uint k = 0; k < (size.sum - row[j].length()) / 2; k++)
-            stream << " ";
+            stream << L" ";
           break;
         case alignment_type::RIGHT:
           for (uint k = 0; k < size.sum - row[j].length(); k++)
-            stream << " ";
+            stream << L" ";
           break;
         }
       }
 
+      wcout << L"MARK5" << endl;
+      printf("Trying to print [");
+      wstring value = row[j];
+      const wchar_t* v = value.c_str();
+
+      for (uint i = 0; i < value.length(); i++) {
+        printf("%d", *(v+i));
+
+        if (i < row[j].length() - 1) {
+          printf(", ");
+        }
+      }
+
+      printf("]\n");
       stream << row[j];
 
       if (header.length() > size.sum) {
@@ -292,11 +313,11 @@ void format_rows(wostream& stream, const table& table,
           break;
         case alignment_type::CENTER:
           for (uint k = 0; k < (header.length() - size.sum + 1) / 2; k++)
-            stream << " ";
+            stream << L" ";
           break;
         case alignment_type::LEFT:
           for (uint k = 0; k < header.length() - size.sum; k++)
-            stream << " ";
+            stream << L" ";
           break;
         }
       }
@@ -304,37 +325,39 @@ void format_rows(wostream& stream, const table& table,
       if (row[j].find(anchor) != string::npos) {
         if (anchor != L"") {
           for (uint k = 0; k < 1 + size.post - (row[j].length() - row[j].find(anchor) - anchor.length()); k++)
-            stream << " ";
+            stream << L" ";
         } else {
           switch (table.alignment(j)) {
           case alignment_type::LEFT:
             for (uint k = 0; k < 1 + size.sum - row[j].length(); k++)
-              stream << " ";
+              stream << L" ";
             break;
           case alignment_type::CENTER:
             for (uint k = 0; k < 1 + (size.sum - row[j].length() + 1) / 2; k++)
-              stream << " ";
+              stream << L" ";
             break;
           case alignment_type::RIGHT:
-            stream << " ";
+            stream << L" ";
             break;
           }
         }
       } else {
         switch (table.alignment(j)) {
         case alignment_type::RIGHT:
-          stream << " ";
+          stream << L" ";
           break;
         case alignment_type::CENTER:
           for (uint k = 0; k < 1 + (size.sum - row[j].length() + 1) / 2; k++)
-            stream << " ";
+            stream << L" ";
           break;
         case alignment_type::LEFT:
           for (uint k = 0; k < 1 + size.sum - row[j].length(); k++)
-            stream << " ";
+            stream << L" ";
           break;
         }
       }
+
+      wcout << L"MARK" << endl;
     }
 
     stream << L"│" << endl;

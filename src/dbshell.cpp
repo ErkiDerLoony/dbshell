@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
   // Fix io of UTF-8 characters.
   std::ios_base::sync_with_stdio(false);
-  std::wcout.imbue(std::locale("en_US.UTF_8"));
+  std::wcout.imbue(std::locale(""));
 
   if (argc < 2) {
     cerr << "You must specify a connection string on the command line!" << endl;

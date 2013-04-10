@@ -8,6 +8,7 @@
 
 #include <sql.h>
 #include <sqlext.h>
+#include <sqlucode.h>
 
 using namespace dbshell;
 using std::unique_ptr;
@@ -137,7 +138,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     throw runtime_error("Error executing query!");
   }
 
-  char fetchBuffer[1000];
+  wchar_t fetchBuffer[1000];
   short numCols = 0;
   short colNum;
   SQLLEN colIndicator;
@@ -164,7 +165,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       SQLSMALLINT length;
       SQLLEN flag = 0;
 
-      rc = SQLColAttributeW(statement, col, SQL_DESC_NAME, buffer, 1000, &length, &flag);
+      rc = SQLColAttribute(statement, col, SQL_DESC_NAME, buffer, 1000, &length, &flag);
 
       if (!SQL_SUCCEEDED(rc)) {
         SQLCloseCursor(statement);
@@ -189,11 +190,11 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       vector<wstring> row;
 
       for (colNum = 1; colNum <= numCols; colNum++) {
-        char buf[1000];
+        wchar_t buf[2048];
         SQLINTEGER len;
         int flag, dvtype;
 
-        rc = SQLGetData(statement, colNum, SQL_C_CHAR, fetchBuffer, sizeof(fetchBuffer), &colIndicator);
+        rc = SQLGetData(statement, colNum, SQL_C_WCHAR, fetchBuffer, sizeof(fetchBuffer), &colIndicator);
 
         if (!SQL_SUCCEEDED (rc)) {
           SQLCloseCursor(statement);
