@@ -18,6 +18,7 @@ prefixes::prefixes() {
   _prefixes.insert(pair<string, string>("rdfs:", "http://www.w3.org/2000/01/rdf-schema#"));
   _prefixes.insert(pair<string, string>("xsd:", "http://www.w3.org/2001/XMLSchema#"));
   _prefixes.insert(pair<string, string>("dc:", "http://purl.org/dc/terms/"));
+  _prefixes.insert(pair<string, string>("foaf:", "http://xmlns.com/foaf/0.1/"));
   _prefixes.insert(pair<string, string>("owl:", "http://www.w3.org/2002/07/owl#"));
   _prefixes.insert(pair<string, string>("dbpedia:", "http://dbpedia.org/"));
   _prefixes.insert(pair<string, string>("de.dbpedia:", "http://de.dbpedia.org/"));
