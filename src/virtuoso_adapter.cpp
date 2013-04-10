@@ -47,7 +47,7 @@ unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
   return unique_ptr<string>(nullptr);
 }
 
-virtuoso_adapter::virtuoso_adapter(std::string host, std::string username) throw(runtime_error) {
+virtuoso_adapter::virtuoso_adapter(string dsn, string username) throw(runtime_error) {
   cout << "Creating virtuoso adapter." << endl;
   cout << "Allocating environment." << endl;
 
@@ -69,19 +69,23 @@ virtuoso_adapter::virtuoso_adapter(std::string host, std::string username) throw
 
   cout << "Loading password." << endl;
   unique_ptr<string> pointer = pwd(username);
-  string password;
+  stringstream password;
 
   if (pointer == nullptr) {
     cout << "WARNING: No password for user »" << username << "« found in ~/.vtpass, this will likely NOT work!" << endl;
   } else {
-    password = *pointer;
-    cout << "Got password »" << password << "«." << endl;
+
+    for (uint i = 0; i < pointer->length(); i++) {
+      password << "*";
+    }
+
+    cout << "Got password »" << password.str() << "«." << endl;
   }
 
-  string dsn = "saruman";
   cout << "Connecting to data source »" << dsn << "«." << endl;
 
-  if (!SQL_SUCCEEDED(SQLConnect(connection, (SQLCHAR*) dsn.c_str(), SQL_NTS, (SQLCHAR*) username.c_str(), SQL_NTS, (SQLCHAR*) password.c_str(), SQL_NTS))) {
+  if (!SQL_SUCCEEDED(SQLConnect(connection, (SQLCHAR*) dsn.c_str(), SQL_NTS, (SQLCHAR*) username.c_str(),
+                                SQL_NTS, (SQLCHAR*) pointer->c_str(), SQL_NTS))) {
     throw runtime_error("Error connecting to data source!");
   }
 

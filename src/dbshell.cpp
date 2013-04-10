@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
   if (index != string::npos) {
     host = rest.substr(0, index);
     rest = rest.substr(index + 1, rest.length());
+  } else {
+    host = rest;
   }
 
   string database = rest;
