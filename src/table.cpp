@@ -232,14 +232,10 @@ void format_rows(wostream& stream, const table& table,
     vector<wstring> row = table.row(i);
 
     for (uint j = 0; j < row.size(); j++) {
-      wcout << L"MARK0" << endl;
       size_type size = sizes[j];
-      wcout << L"MARK1" << endl;
       wstring anchor = table.alignment_string(j);
-      wcout << L"MARK2" << endl;
       wstring header = table.column(j);
       stream << L"│ ";
-      wcout << L"MARK3" << endl;
 
       if (header.length() > size.sum) {
         switch (table.alignment(j)) {
@@ -255,8 +251,6 @@ void format_rows(wostream& stream, const table& table,
           break;
         }
       }
-
-      wcout << L"MARK4" << endl;
 
       if (row[j].find(anchor) != string::npos) {
         if (anchor != L"") {
@@ -291,20 +285,6 @@ void format_rows(wostream& stream, const table& table,
         }
       }
 
-      wcout << L"MARK5" << endl;
-      printf("Trying to print [");
-      wstring value = row[j];
-      const wchar_t* v = value.c_str();
-
-      for (uint i = 0; i < value.length(); i++) {
-        printf("%d", *(v+i));
-
-        if (i < row[j].length() - 1) {
-          printf(", ");
-        }
-      }
-
-      printf("]\n");
       stream << row[j];
 
       if (header.length() > size.sum) {
@@ -356,8 +336,6 @@ void format_rows(wostream& stream, const table& table,
           break;
         }
       }
-
-      wcout << L"MARK" << endl;
     }
 
     stream << L"│" << endl;
