@@ -52,7 +52,6 @@ void prefixes::prefix(dbshell::table& t) const {
 }
 
 string prefixes::prefix(const string& t) const {
-  std::cout << "Prefixing »" << t << "«." << std::endl;
 
   for (pair<string, string> prefix : _prefixes) {
 
