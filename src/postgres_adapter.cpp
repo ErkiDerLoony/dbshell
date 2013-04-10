@@ -71,6 +71,8 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 20: // int8
     case 21: // int2
     case 23: // int4
+    case 700: // float4
+    case 701: // float8
     case 1700: // numeric
       result->add(buffer.str(), alignment_type::RIGHT, L".");
       break;
