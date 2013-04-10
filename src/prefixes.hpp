@@ -43,7 +43,7 @@ public:
    * @return  A string that contains this mapping’s prefixes formatted like
    *          “PREFIX : <http://example.org>”.
    */
-  virtual std::wstring format() const;
+  virtual std::string format() const;
 
   /**
    * Format this mapping’s prefixes into a table.
@@ -54,7 +54,7 @@ public:
 
 private:
 
-  std::map<std::wstring, std::wstring> _prefixes;
+  std::map<std::string, std::string> _prefixes;
 
 }; /* class prefixes */
 

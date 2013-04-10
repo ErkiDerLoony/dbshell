@@ -7,18 +7,20 @@
 using namespace dbshell;
 using std::wstringstream;
 using std::wstring;
+using std::stringstream;
+using std::string;
 using std::pair;
 using std::vector;
 using std::unique_ptr;
 
 prefixes::prefixes() {
-  _prefixes.insert(pair<wstring, wstring>(L"rdf:", L"http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
-  _prefixes.insert(pair<wstring, wstring>(L"rdfs:", L"http://www.w3.org/2000/01/rdf-schema#"));
-  _prefixes.insert(pair<wstring, wstring>(L"xsd:", L"http://www.w3.org/2001/XMLSchema#"));
-  _prefixes.insert(pair<wstring, wstring>(L"dc:", L"http://purl.org/dc/terms/"));
-  _prefixes.insert(pair<wstring, wstring>(L"owl:", L"http://www.w3.org/2002/07/owl#"));
-  _prefixes.insert(pair<wstring, wstring>(L"dbpedia:", L"http://dbpedia.org/"));
-  _prefixes.insert(pair<wstring, wstring>(L"de.dbpedia:", L"http://de.dbpedia.org/"));
+  _prefixes.insert(pair<string, string>("rdf:", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"));
+  _prefixes.insert(pair<string, string>("rdfs:", "http://www.w3.org/2000/01/rdf-schema#"));
+  _prefixes.insert(pair<string, string>("xsd:", "http://www.w3.org/2001/XMLSchema#"));
+  _prefixes.insert(pair<string, string>("dc:", "http://purl.org/dc/terms/"));
+  _prefixes.insert(pair<string, string>("owl:", "http://www.w3.org/2002/07/owl#"));
+  _prefixes.insert(pair<string, string>("dbpedia:", "http://dbpedia.org/"));
+  _prefixes.insert(pair<string, string>("de.dbpedia:", "http://de.dbpedia.org/"));
 }
 
 prefixes::~prefixes() {
@@ -30,14 +32,16 @@ void prefixes::prefix(dbshell::table& t) const {
 
     for (uint col = 0; col < t.columns(); col++) {
 
-      for (pair<wstring, wstring> prefix : _prefixes) {
+      for (pair<string, string> prefix : _prefixes) {
         wstringstream buffer;
-        buffer << "<" << prefix.second;
+        buffer << "<" << prefix.second.c_str();
         wstring value = t.get(row, col);
 
         if (value.substr(0, prefix.second.length() + 1) == buffer.str()) {
           wstringstream updated;
-          updated << prefix.first << value.substr(prefix.second.length() + 1, value.length() - prefix.second.length() - 2);
+          updated << prefix.first.c_str()
+                  << value.substr(prefix.second.length() + 1,
+                                  value.length() - prefix.second.length() - 2);
           t.set(row, col, updated.str());
           break;
         }
@@ -46,11 +50,11 @@ void prefixes::prefix(dbshell::table& t) const {
   }
 }
 
-wstring prefixes::format() const {
-  wstringstream result;
+string prefixes::format() const {
+  stringstream result;
   bool first = true;
 
-  for (pair<wstring, wstring> prefix : _prefixes) {
+  for (pair<string, string> prefix : _prefixes) {
 
     if (first) {
       first = false;
@@ -58,7 +62,7 @@ wstring prefixes::format() const {
       result << " ";
     }
 
-    result << prefix.first << " " << prefix.second;
+    result << "PREFIX " << prefix.first << " <" << prefix.second << ">";
   }
 
   return result.str();
@@ -70,10 +74,16 @@ unique_ptr<table> prefixes::format_as_table() const {
   result->add(L"Prefix");
   result->add(L"URI");
 
-  for (pair<wstring, wstring> prefix : _prefixes) {
+  for (pair<string, string> prefix : _prefixes) {
+    wstringstream first;
+    first << prefix.first.c_str();
+
+    wstringstream second;
+    second << prefix.second.c_str();
+
     vector<wstring> row;
-    row.push_back(prefix.first);
-    row.push_back(prefix.second);
+    row.push_back(first.str());
+    row.push_back(second.str());
     result->add(row);
   }
 

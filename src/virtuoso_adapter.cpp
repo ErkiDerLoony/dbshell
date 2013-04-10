@@ -125,8 +125,10 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
   string prefix = query.substr(0, 6);
 
-  if (prefix != "sparql" && prefix != "SPARQL" && prefix != "Sparql") {
-    query = "SPARQL " + query;
+  if (prefix == "sparql" || prefix == "SPARQL" || prefix == "Sparql") {
+    query = "SPARQL " + _prefixes.format() + " " + query.substr(6);
+  } else {
+    query = "SPARQL " + _prefixes.format() + " " + query;
   }
 
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
