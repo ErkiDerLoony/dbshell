@@ -182,8 +182,8 @@ unique_ptr<vector<size_type>> sizes(const table& table) {
       if (pre == string::npos) {
 
         if (row[col].length() > anchor.length()) {
-          pre = (row[col].length() - anchor.length()) / 2;
-          post = (row[col].length() - anchor.length() + 1) / 2;
+          pre = row[col].length();
+          post = 0;
         } else {
           pre = row[col].length() / 2;
           post = (row[col].length() + 1) / 2;
@@ -278,18 +278,8 @@ void format_rows(wostream& stream, const table& table,
           }
         }
       } else {
-        switch (table.alignment(j)) {
-        case alignment_type::LEFT:
-          break;
-        case alignment_type::CENTER:
-          for (uint k = 0; k < (size.sum - row[j].length()) / 2; k++)
-            stream << L" ";
-          break;
-        case alignment_type::RIGHT:
-          for (uint k = 0; k < size.sum - row[j].length(); k++)
-            stream << L" ";
-          break;
-        }
+        for (uint k = 0; k < size.pre - row[j].length(); k++)
+          stream << L" ";
       }
 
       stream << row[j];
@@ -329,19 +319,8 @@ void format_rows(wostream& stream, const table& table,
           }
         }
       } else {
-        switch (table.alignment(j)) {
-        case alignment_type::RIGHT:
+        for (uint k = 0; k < 1 + size.sum - size.pre; k++)
           stream << L" ";
-          break;
-        case alignment_type::CENTER:
-          for (uint k = 0; k < 1 + (size.sum - row[j].length() + 1) / 2; k++)
-            stream << L" ";
-          break;
-        case alignment_type::LEFT:
-          for (uint k = 0; k < 1 + size.sum - row[j].length(); k++)
-            stream << L" ";
-          break;
-        }
       }
     }
 
