@@ -20,8 +20,10 @@ prefixes::prefixes() {
   _prefixes.insert(pair<string, string>("dc:", "http://purl.org/dc/terms/"));
   _prefixes.insert(pair<string, string>("foaf:", "http://xmlns.com/foaf/0.1/"));
   _prefixes.insert(pair<string, string>("owl:", "http://www.w3.org/2002/07/owl#"));
-  _prefixes.insert(pair<string, string>("dbpedia:", "http://dbpedia.org/"));
-  _prefixes.insert(pair<string, string>("de.dbpedia:", "http://de.dbpedia.org/"));
+  _prefixes.insert(pair<string, string>("dbpedia:", "http://dbpedia.org/resource/"));
+  _prefixes.insert(pair<string, string>("dbpedia-owl:", "http://dbpedia.org/ontology/"));
+  _prefixes.insert(pair<string, string>("dbpedia-prop:", "http://dbpedia.org/property/"));
+  _prefixes.insert(pair<string, string>("de.dbpedia:", "http://de.dbpedia.org/resource/"));
 }
 
 prefixes::~prefixes() {
@@ -88,7 +90,7 @@ string prefixes::format() const {
 unique_ptr<table> prefixes::format_as_table() const {
   unique_ptr<table> result = unique_ptr<table>(new table());
 
-  result->add(L"Prefix");
+  result->add(L"Prefix", alignment_type::RIGHT);
   result->add(L"URI");
 
   for (pair<string, string> prefix : _prefixes) {

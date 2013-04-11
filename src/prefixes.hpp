@@ -14,15 +14,13 @@ class prefixes {
 public:
 
   /**
-   * Create a new prefix mapping with the following initial default prefixes:
+   * Create a new prefix mapping that contains---among others---the following initial prefixes:
    * <ul>
    * <li>“rdf:” for <a href=http://www.w3.org/1999/02/22-rdf-syntax-ns#>http://www.w3.org/1999/02/22-rdf-syntax-ns#</a>
    * <li>“rdfs:” for <a href=http://www.w3.org/2000/01/rdf-schema#>http://www.w3.org/2000/01/rdf-schema#</a>
    * <li>“xsd:” for <a href=http://www.w3.org/2001/XMLSchema#>http://www.w3.org/2001/XMLSchema#</a>
    * <li>“dc:” for <a href=http://purl.org/dc/terms/>http://purl.org/dc/terms/</a>
    * <li>“owl:” for <a href=http://www.w3.org/2002/07/owl#>http://www.w3.org/2002/07/owl#</a>
-   * <li>“dbpedia:” for <a href=http://dbpedia.org/>http://dbpedia.org/</a>
-   * <li>“de.dbpedia:” for <a href=http://de.dbpedia.org/>http://de.dbpedia.org/</a>
    * </ul>
    */
   prefixes();
