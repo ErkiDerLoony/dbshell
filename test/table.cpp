@@ -42,4 +42,19 @@ int main(int argc, char** argv) {
   t1.add({L"-0.234", L"-0.234", L"-0.234", L"-0.234", L"-0.234", L"-0.234"});
 
   wcout << t1 << endl;
+
+  table t2;
+
+  t2.add(L"l", alignment_type::LEFT, L".");
+  t2.add(L"c", alignment_type::CENTER, L".");
+  t2.add(L"r", alignment_type::RIGHT, L".");
+  t2.add(L"very long l", alignment_type::LEFT, L".");
+  t2.add(L"very long c", alignment_type::CENTER, L".");
+  t2.add(L"very long r", alignment_type::RIGHT, L".");
+
+  t2.add({L"-1", L"-1", L"-1", L"-1", L"-1", L"-1"});
+  t2.add({L"0", L"0", L"0", L"0", L"0", L"0"});
+  t2.add({L"100", L"100", L"100", L"100", L"100", L"100"});
+
+  wcout << t2 << endl;
 }

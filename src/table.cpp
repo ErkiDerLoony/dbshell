@@ -163,6 +163,7 @@ struct size_type {
 
 unique_ptr<vector<size_type>> sizes(const table& table) {
   unique_ptr<vector<size_type>> sizes = unique_ptr<vector<size_type>>(new vector<size_type>());
+  vector<bool> contains_alignment_string;
 
   for (uint col = 0; col < table.columns(); col++) {
     size_type t;
@@ -170,6 +171,8 @@ unique_ptr<vector<size_type>> sizes(const table& table) {
     t.post = 0;
     t.sum = 0;
     sizes->push_back(t);
+
+    contains_alignment_string.push_back(false);
   }
 
   for (vector<wstring> row : table) {
@@ -180,16 +183,10 @@ unique_ptr<vector<size_type>> sizes(const table& table) {
       uint post;
 
       if (pre == string::npos) {
-
-        if (row[col].length() > anchor.length()) {
-          pre = row[col].length();
-          post = 0;
-        } else {
-          pre = row[col].length() / 2;
-          post = (row[col].length() + 1) / 2;
-        }
-
+        pre = row[col].length();
+        post = 0;
       } else {
+        contains_alignment_string[col] = true;
         post = row[col].length() - row[col].find(anchor) - anchor.length();
       }
 
@@ -204,7 +201,11 @@ unique_ptr<vector<size_type>> sizes(const table& table) {
   }
 
   for (uint col = 0; col < table.columns(); col++) {
-    (*sizes)[col].sum = (*sizes)[col].pre + (*sizes)[col].post + table.alignment_string(col).length();
+    (*sizes)[col].sum = (*sizes)[col].pre + (*sizes)[col].post;
+
+    if (contains_alignment_string[col]) {
+      (*sizes)[col].sum += table.alignment_string(col).length();
+    }
   }
 
   return sizes;
