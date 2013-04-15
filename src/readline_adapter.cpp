@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <unistd.h>
+#include <iostream>
 
 extern "C" {
 #include <stdio.h>
@@ -41,6 +42,10 @@ string dbshell::readline() {
 
   ::add_history(line.c_str());
   return line;
+}
+
+void dbshell::clear_input() {
+  rl_replace_line("", 0);
 }
 
 class history_management {

@@ -23,6 +23,9 @@ extern std::string prompt;
  */
 std::string readline();
 
+/** Clear all input. */
+void clear_input();
+
 } /* namespace dbshell */
 
 #endif /* READLINE_HPP */

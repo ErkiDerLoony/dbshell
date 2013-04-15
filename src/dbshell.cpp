@@ -35,6 +35,8 @@ namespace dbshell {
 
 void handler(int sig) {
 
+  dbshell::clear_input();
+
   if (!running) {
     return;
   }

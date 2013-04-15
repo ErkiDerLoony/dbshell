@@ -133,9 +133,9 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   totalSets = 0;
 
   do {
-    rc = SQLNumResultCols (statement, &numCols);
+    rc = SQLNumResultCols(statement, &numCols);
 
-    if (!SQL_SUCCEEDED (rc)) {
+    if (!SQL_SUCCEEDED(rc)) {
       SQLCloseCursor(statement);
       throw runtime_error("Could not get number of result columns!");
     }
@@ -286,6 +286,7 @@ void virtuoso_adapter::cancel() {
 
       cout << "Please be patient." << endl;
     } else {
+      statement = SQL_NULL_HANDLE;
       cout << "Query cancelled." << endl;
     }
   }
