@@ -232,7 +232,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       totalRows++;
     }
 
-    printf ("\n\nStatement returned %du rows.\n", totalRows);
+    printf("\n\nStatement returned %du rows.\n", totalRows);
     totalSets++;
   } while (SQLMoreResults(statement) == SQL_SUCCESS);
 

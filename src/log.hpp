@@ -4,55 +4,45 @@
 #include <iostream>
 #include <sstream>
 
-namespace dbshell {
-
 namespace log {
 
-enum level {
+enum loglevel {
   DEBUG, INFO, WARNING
 };
 
-}
+typedef std::basic_ostream<char, std::char_traits<char>> stdout;
 
 namespace detail {
 
-class logger {
+class logger final {
 
 public:
 
-  logger(log::level level);
-
+  logger(loglevel level);
   virtual ~logger();
-
-  typedef std::basic_ostream<char, std::char_traits<char>> stdout;
-  typedef stdout& (*stdendl)(detail::logger::stdout&);
-
   logger& operator<<(const std::wstring& t);
-
   logger& operator<<(const std::string& t);
-
-  logger& operator<<(stdendl f);
+  logger& operator<<(const int& i);
+  logger& operator<<(stdout& (*f)(stdout&));
 
 private:
 
-  log::level _level;
-
+  loglevel _level;
   std::wstringstream _buffer;
 
 }; /* class logger */
 
 } /* namespace detail */
 
-namespace log {
-
 extern std::wostream& handler;
+extern loglevel level;
+extern bool use_colour;
+extern stdout& (*endl)(stdout&);
 
 extern detail::logger warning;
 extern detail::logger info;
 extern detail::logger debug;
 
-}
-
-} /* namespace dbshell */
+} /* namespace log */
 
 #endif /* LOG_HPP */
