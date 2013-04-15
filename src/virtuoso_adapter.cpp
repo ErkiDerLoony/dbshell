@@ -44,44 +44,44 @@ unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
 }
 
 virtuoso_adapter::virtuoso_adapter(std::string host, std::string username) throw(runtime_error) {
-  log::info << "Creating virtuoso adapter." << endl;
-  cout << "Allocating environment." << endl;
+  log::debug << "Creating virtuoso adapter." << endl;
+  log::debug << "Allocating environment." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment))) {
     throw runtime_error("Error creating environment!");
   }
 
-  cout << "Adapting ODBC version." << endl;
+  log::debug << "Adapting ODBC version." << endl;
 
   if (!SQL_SUCCEEDED(SQLSetEnvAttr(environment, SQL_ATTR_ODBC_VERSION, (void *) SQL_OV_ODBC3, 0))) {
     throw runtime_error("Error setting ODBC version!");
   }
 
-  cout << "Creating connection handle." << endl;
+  log::debug << "Creating connection handle." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_DBC, environment, &connection))) {
     throw runtime_error("Error creating connection!");
   }
 
-  cout << "Loading password." << endl;
+  log::debug << "Loading password." << endl;
   unique_ptr<string> pointer = pwd(username);
   string password;
 
   if (pointer == nullptr) {
-    cout << "WARNING: No password for user »" << username << "« found in ~/.vtpass, this will likely NOT work!" << endl;
+    log::warning << "WARNING: No password for user »" << username << "« found in ~/.vtpass, this will likely NOT work!" << endl;
   } else {
     password = *pointer;
-    cout << "Got password »" << password << "«." << endl;
+    log::debug << "Got password »" << password << "«." << endl;
   }
 
   string dsn = "saruman";
-  cout << "Connecting to data source »" << dsn << "«." << endl;
+  log::debug << "Connecting to data source »" << dsn << "«." << endl;
 
   if (!SQL_SUCCEEDED(SQLConnect(connection, (SQLCHAR*) dsn.c_str(), SQL_NTS, (SQLCHAR*) username.c_str(), SQL_NTS, (SQLCHAR*) password.c_str(), SQL_NTS))) {
     throw runtime_error("Error connecting to data source!");
   }
 
-  cout << "Allocating statement." << endl;
+  log::debug << "Allocating statement." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_STMT, connection, &statement))) {
     throw runtime_error("Error allocating statement!");
@@ -91,22 +91,22 @@ virtuoso_adapter::virtuoso_adapter(std::string host, std::string username) throw
 virtuoso_adapter::~virtuoso_adapter() {
 
   if (statement) {
-    cout << "Releasing statement." << endl;
+    log::debug << "Releasing statement." << endl;
     SQLFreeHandle(SQL_HANDLE_STMT, statement);
   }
 
   if (connection) {
-    cout << "Disconnecting and releasing connection." << endl;
+    log::debug << "Disconnecting and releasing connection." << endl;
     SQLDisconnect(connection);
     SQLFreeHandle(SQL_HANDLE_DBC, connection);
   }
 
   if (environment) {
-    cout << "Releasing environment." << endl;
+    log::debug << "Releasing environment." << endl;
     SQLFreeHandle(SQL_HANDLE_ENV, environment);
   }
 
-  cout << "Virtuoso adapter destroyed." << endl;
+  log::debug << "Virtuoso adapter destroyed." << endl;
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
