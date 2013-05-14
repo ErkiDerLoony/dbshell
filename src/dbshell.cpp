@@ -42,6 +42,7 @@ using std::wstring;
 using std::wcout;
 using std::cerr;
 using std::endl;
+using std::flush;
 using std::pair;
 using std::stringstream;
 using std::runtime_error;
@@ -148,6 +149,11 @@ int main(int argc, char** argv) {
       dbshell::running = true;
       unique_ptr<table> table = dbshell::connection->query(line);
       dbshell::running = false;
+
+      if (table == nullptr) {
+	continue;
+      }
+
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
@@ -158,7 +164,7 @@ int main(int argc, char** argv) {
             << wstring(format_duration(diff).c_str())
             << endl;
     } catch (runtime_error e) {
-      wcout << e.what() << endl;
+      wcout << e.what() << flush;
     }
   }
 

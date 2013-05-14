@@ -62,10 +62,33 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     throw runtime_error("Not connected to any database!");
   }
 
-  if (query == "\\d" || query == "\\dt") {
-    query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema IN (SELECT current_schema()) ORDER BY table_name";
+  if (query == "\\d") {
+    query = "SELECT table_schema, table_name, table_type FROM information_schema.tables WHERE table_schema NOT IN ((SELECT 'pg_catalog') UNION (SELECT 'information_schema')) ORDER BY table_schema, table_name";
   } else if (query.length() > 2 && query.substr(0, 3) == "\\d ") {
-    query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + query.substr(3) + "'";
+    string name = query.substr(3);
+    uint index = name.find(".");
+
+    if (index != string::npos) {
+      string schema = name.substr(0, index);
+      name = name.substr(index + 1);
+
+      if (name == "*") {
+	query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '" + schema + "' ORDER BY table_name";
+      } else {
+	query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "' AND table_schema = '" + schema + "'";
+      }
+
+    } else {
+      query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "'";
+    }
+  } else if (query == "\\h" || query == "\\?" || query == "help") {
+    cout << "\\d                   List available tables." << endl;
+    cout << "\\d <table>           List columns of table <table>." << endl;
+    cout << "\\d <schema>.*        List tables in schema <schema>." << endl;
+    cout << "\\d <schema>.<table>  List columns of table <table> in schema <schema>." << endl;
+    cout << "(\\h|\\?|help)         Print this helpful message." << endl;
+    cout << "(\\q|quit)            Exit program." << endl;
+    return unique_ptr<table>(nullptr);
   }
 
   auto res = PQexec(_connection, query.c_str());

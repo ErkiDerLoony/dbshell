@@ -46,7 +46,8 @@ public:
    * @throws  If no connection to the database was established or the query
    *          failed to execute.
    */
-  virtual std::unique_ptr<table> query(std::string query) throw(std::runtime_error) = 0;
+  virtual std::unique_ptr<table> query(std::string query)
+    throw(std::runtime_error) = 0;
 
   /**
    * Cancel a running query asap. If no query is currently being executed
