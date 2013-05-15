@@ -66,7 +66,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     query = "SELECT table_schema, table_name, table_type FROM information_schema.tables WHERE table_schema NOT IN ((SELECT 'pg_catalog') UNION (SELECT 'information_schema')) ORDER BY table_schema, table_name";
   } else if (query.length() > 2 && query.substr(0, 3) == "\\d ") {
     string name = query.substr(3);
-    uint index = name.find(".");
+    auto index = name.find(".");
 
     if (index != string::npos) {
       string schema = name.substr(0, index);
@@ -81,6 +81,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     } else {
       query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "'";
     }
+
   } else if (query == "\\h" || query == "\\?" || query == "help") {
     cout << "\\d                   List available tables." << endl;
     cout << "\\d <table>           List columns of table <table>." << endl;
