@@ -123,6 +123,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       result->add(buffer.str(), alignment_type::CENTER);
       break;
     case 25: // text
+    case 705: // unknown
     case 1043: // varchar
     case 1082: // date
       result->add(buffer.str());
