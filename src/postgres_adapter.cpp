@@ -138,10 +138,30 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     vector<wstring> row;
 
     for (int j = 0; j < ncols; j++) {
+      Oid type = PQftype(res, j);
+
       char* buffer = PQgetvalue(res, i, j);
       wchar_t wbuffer[1024];
       std::mbstowcs(wbuffer, buffer, 1024);
-      row.push_back(wbuffer);
+      wstring value(wbuffer);
+
+      switch (type) {
+      case 700: // float4
+      case 701: // float8
+      case 1700: // numeric
+
+	if (value.find('0') != string::npos) {
+	  value.erase(value.find_last_not_of('0') + 1, string::npos);
+
+	  if (value.length() > 0 && value.substr(value.length() - 1, value.length()) == L".") {
+	    value += L"0";
+	  }
+	}
+
+	break;
+      }
+
+      row.push_back(value);
     }
 
     result->add(row);
