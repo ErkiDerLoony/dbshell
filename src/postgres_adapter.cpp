@@ -82,9 +82,12 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "'";
     }
 
+  } else if (query == "\\s") {
+    query = "SELECT usename AS user, client_addr AS ip, state, TO_CHAR(state_change, 'DD.MM.YYYY HH:MM:SS') AS since, CASE WHEN LENGTH(query) > 93 THEN SUBSTRING(query FROM 0 FOR 90) || '...' ELSE query END AS query FROM pg_stat_activity";
   } else if (query == "\\h" || query == "\\?" || query == "help") {
+    cout << "\\s                   Print some information about queries currently running on the server." << endl;
     cout << "\\d                   List available tables." << endl;
-    cout << "\\d <table>           List columns of table <table>." << endl;
+    cout << "\\d <table>           List columns of table <table> in the currently active schema." << endl;
     cout << "\\d <schema>.*        List tables in schema <schema>." << endl;
     cout << "\\d <schema>.<table>  List columns of table <table> in schema <schema>." << endl;
     cout << "(\\h|\\?|help)         Print this helpful message." << endl;
@@ -122,8 +125,10 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 16: // bool
       result->add(buffer.str(), alignment_type::CENTER);
       break;
+    case 19: // name
     case 25: // text
     case 705: // unknown
+    case 869: // inet
     case 1043: // varchar
     case 1082: // date
       result->add(buffer.str());
