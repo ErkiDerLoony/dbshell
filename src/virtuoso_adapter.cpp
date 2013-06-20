@@ -125,6 +125,14 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
   if (query == "\\p" || query == "prefixes") {
     return _prefixes.format_as_table();
+  } else if (query == "\\g") {
+    query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } }";
+  } else if (query == "\\h" || query == "\\?") {
+    wcout << "\\g       List graphs in the currently connected database." << endl;
+    wcout << "(\\h|\\?)  Print this helpful message." << endl;
+    wcout << "\\p       Print prefix table." << endl;
+    wcout << "\\q       Disconnect and exit." << endl;
+    return unique_ptr<table>(nullptr);
   }
 
   string prefix = query.substr(0, 6);
@@ -138,7 +146,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
-    throw runtime_error("Error executing query!");
+    throw runtime_error("Error executing query!\n");
   }
 
   wchar_t fetchBuffer[1000];
@@ -156,7 +164,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
     if (!SQL_SUCCEEDED(rc)) {
       SQLCloseCursor(statement);
-      throw runtime_error("Could not get number of result columns!");
+      throw runtime_error("Could not get number of result columns!\n");
     }
 
     if (numCols == 0) {
@@ -172,7 +180,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
       if (!SQL_SUCCEEDED(rc)) {
         SQLCloseCursor(statement);
-        throw runtime_error("Could not find out column name!");
+        throw runtime_error("Could not find out column name!\n");
       }
 
       table->add_column(buffer);
@@ -187,7 +195,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
       if (!SQL_SUCCEEDED(rc)) {
         SQLCloseCursor(statement);
-        throw runtime_error("Could not fetch any data!");
+        throw runtime_error("Could not fetch any data!\n");
       }
 
       vector<wstring> row;
@@ -199,28 +207,28 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
         if (!SQL_SUCCEEDED (rc)) {
           SQLCloseCursor(statement);
-          throw runtime_error("Could not get column data!");
+          throw runtime_error("Could not get column data!\n");
         }
 
         rc = SQLGetStmtAttr(statement, SQL_ATTR_IMP_ROW_DESC, &hdesc, SQL_IS_POINTER, NULL);
 
         if (!SQL_SUCCEEDED (rc)) {
           SQLCloseCursor(statement);
-          throw runtime_error("Could not create column attribute handle!");
+          throw runtime_error("Could not create column attribute handle!\n");
         }
 
         rc = SQLGetDescField (hdesc, colNum, SQL_DESC_COL_DV_TYPE, &dvtype, SQL_IS_INTEGER, NULL);
 
         if (!SQL_SUCCEEDED (rc)) {
           SQLCloseCursor(statement);
-          throw runtime_error("Could not get column data type!");
+          throw runtime_error("Could not get column data type!\n");
         }
 
         rc = SQLGetDescField (hdesc, colNum, SQL_DESC_COL_BOX_FLAGS, &flag, SQL_IS_INTEGER, NULL);
 
         if (!SQL_SUCCEEDED (rc)) {
           SQLCloseCursor(statement);
-          throw runtime_error("Could not get column flags!");
+          throw runtime_error("Could not get column flags!\n");
         }
 
         if (colIndicator == SQL_NULL_DATA) {
@@ -243,7 +251,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
             if (!SQL_SUCCEEDED(rc)) {
               SQLCloseCursor(statement);
-              throw runtime_error("Could not get literal language!");
+              throw runtime_error("Could not get literal language!\n");
             }
 
             if (len) {
@@ -254,7 +262,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
             if (!SQL_SUCCEEDED(rc)) {
               SQLCloseCursor(statement);
-              throw runtime_error("Could not get literal type!");
+              throw runtime_error("Could not get literal type!\n");
             }
 
             if (len) {
