@@ -53,6 +53,21 @@ public:
   virtual std::string format() const;
 
   /**
+   * Add a prefix to this mapping.
+   *
+   * @param prefix  The new prefix.
+   * @param iri     The full iri of the new prefix.
+   */
+  virtual void add(std::string prefix, std::string iri);
+
+  /**
+   * Remove a prefix from this mapping.
+   *
+   * @param prefix  The prefix that shall be removed.
+   */
+  virtual void remove(std::string prefix);
+
+  /**
    * Format this mapping’s prefixes into a table.
    *
    * @return  A table that contains this mapping’s prefixes.

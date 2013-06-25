@@ -87,6 +87,14 @@ string prefixes::format() const {
   return result.str();
 }
 
+void prefixes::add(string prefix, string iri) {
+  _prefixes[prefix] = iri;
+}
+
+void prefixes::remove(string prefix) {
+  _prefixes.erase(prefix);
+}
+
 unique_ptr<table> prefixes::format_as_table() const {
   unique_ptr<table> result = unique_ptr<table>(new table());
 

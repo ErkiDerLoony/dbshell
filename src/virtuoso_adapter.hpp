@@ -47,7 +47,7 @@ public:
 
   virtual ~virtuoso_adapter();
 
-  virtual std::unique_ptr<table> query(std::string query) throw (std::runtime_error) override;
+  virtual std::unique_ptr<table> query(std::string query) throw(std::runtime_error) override;
 
   virtual void cancel() override;
 
@@ -58,6 +58,13 @@ private:
   SQLHANDLE statement = SQL_NULL_HANDLE;
 
   prefixes _prefixes;
+
+  /**
+   * Called internally to retrieve the SQL error state if some SQL function call failed.
+   *
+   * @throws  An exception that contains the SQL error description.
+   */
+  void error() const throw(std::runtime_error);
 
   /**
    * Try to read the password for a user from ~/.vtpass (similar to PostgreSQL’s

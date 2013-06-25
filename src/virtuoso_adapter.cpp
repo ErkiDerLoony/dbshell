@@ -121,17 +121,48 @@ virtuoso_adapter::~virtuoso_adapter() {
   }
 }
 
+void virtuoso_adapter::error() const throw(runtime_error) {
+  SQLCHAR state[1024];
+  SQLINTEGER native;
+  const SQLSMALLINT buffer_length = 4096;
+  SQLCHAR text[buffer_length];
+  SQLSMALLINT text_length;
+  SQLError(environment, connection, statement, state, &native, text, buffer_length, &text_length);
+  stringstream buffer;
+  buffer << text << endl;
+  throw runtime_error(buffer.str());
+}
+
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
 
-  if (query == "\\p" || query == "prefixes") {
+  if (query.length() > 2 && query.substr(0, 2) == "\\a") {
+    query = query.substr(3);
+    auto pos = query.find(" ");
+
+    if (pos == string::npos) {
+      stringstream buffer;
+      buffer << "Missing IRI!" << endl;
+      throw new runtime_error(buffer.str());
+    } else {
+      _prefixes.add(query.substr(0, pos), query.substr(pos + 1));
+      return unique_ptr<table>(nullptr);
+    }
+
+  } else if (query.length() > 2 && (query.substr(0, 2) == "\\d" || query.substr(0, 2) == "\\r")) {
+    auto prefix = query.substr(3);
+    _prefixes.remove(prefix);
+    return unique_ptr<table>(nullptr);
+  } else if (query == "\\p") {
     return _prefixes.format_as_table();
   } else if (query == "\\g") {
     query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } }";
   } else if (query == "\\h" || query == "\\?") {
-    wcout << "\\g       List graphs in the currently connected database." << endl;
-    wcout << "(\\h|\\?)  Print this helpful message." << endl;
-    wcout << "\\p       Print prefix table." << endl;
-    wcout << "\\q       Disconnect and exit." << endl;
+    wcout << "\\a <prefix> <iri>   Add a prefix to the prefix table." << endl;
+    wcout << "(\\d|\\r) <prefix>    Delete a prefix from the prefix table." << endl;
+    wcout << "\\g                  List graphs in the currently connected database." << endl;
+    wcout << "(\\h|\\?)             Print this helpful message." << endl;
+    wcout << "\\p                  Print prefix table." << endl;
+    wcout << "\\q                  Disconnect and exit." << endl;
     return unique_ptr<table>(nullptr);
   }
 
@@ -146,7 +177,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
-    throw runtime_error("Error executing query!\n");
+    error();
   }
 
   wchar_t fetchBuffer[1000];
