@@ -144,13 +144,26 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       buffer << "Missing IRI!" << endl;
       throw new runtime_error(buffer.str());
     } else {
-      _prefixes.add(query.substr(0, pos), query.substr(pos + 1));
+      string prefix = query.substr(0, pos);
+      string iri = query.substr(pos + 1);
+
+      if (iri.substr(0, 1) == "<") {
+	iri = iri.substr(1);
+      }
+
+      if (iri.substr(iri.length() - 1) == ">") {
+	iri = iri.substr(0, iri.length() - 1);
+      }
+
+      _prefixes.add(prefix, iri);
+      wcout << "Added prefix " << prefix.c_str() << " with IRI " << iri.c_str() << "." << endl;
       return unique_ptr<table>(nullptr);
     }
 
   } else if (query.length() > 2 && (query.substr(0, 2) == "\\d" || query.substr(0, 2) == "\\r")) {
-    auto prefix = query.substr(3);
+    string prefix = query.substr(3);
     _prefixes.remove(prefix);
+    wcout << "Deleted prefix " << prefix.c_str() << "." << endl;
     return unique_ptr<table>(nullptr);
   } else if (query == "\\p") {
     return _prefixes.format_as_table();
