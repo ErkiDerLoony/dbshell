@@ -41,6 +41,7 @@ using std::string;
 using std::wstring;
 using std::wcout;
 using std::cerr;
+using std::cout;
 using std::endl;
 using std::flush;
 using std::pair;
@@ -73,6 +74,16 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     cerr << "You must specify a connection string on the command line!" << endl;
     return 1;
+  }
+
+  if (string(argv[1]) == "--help" || string(argv[1]) == "-h" || string(argv[1]) == "-help") {
+    cout << "Usage: dbshell <schema>://[<username>@]<dbhost>[/dbname]" << endl;
+    return 0;
+  }
+
+  if (string(argv[1]) == "--version" || string(argv[1]) == "-version") {
+    cout << "dbshell version 0.1.0" << endl;
+    return 0;
   }
 
   string arg(argv[1]);
