@@ -91,6 +91,10 @@ void prefixes::add(string prefix, string iri) {
   _prefixes[prefix] = iri;
 }
 
+bool prefixes::contains(string prefix) {
+  return _prefixes.find(prefix) != _prefixes.end();
+}
+
 void prefixes::remove(string prefix) {
   _prefixes.erase(prefix);
 }
