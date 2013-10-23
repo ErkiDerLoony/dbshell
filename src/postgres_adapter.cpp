@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 
+using std::wcout;
 using std::cout;
 using std::endl;
 using std::pair;
@@ -73,9 +74,9 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       name = name.substr(index + 1);
 
       if (name == "*") {
-	query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '" + schema + "' ORDER BY table_name";
+        query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '" + schema + "' ORDER BY table_name";
       } else {
-	query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "' AND table_schema = '" + schema + "'";
+        query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "' AND table_schema = '" + schema + "'";
       }
 
     } else {
@@ -123,6 +124,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       result->add(buffer.str(), alignment_type::CENTER, L".");
       break;
     case 16: // bool
+    case 1082: // date
       result->add(buffer.str(), alignment_type::CENTER);
       break;
     case 19: // name
@@ -130,7 +132,6 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 705: // unknown
     case 869: // inet
     case 1043: // varchar
-    case 1082: // date
       result->add(buffer.str());
       break;
     default:
@@ -155,15 +156,15 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
       case 701: // float8
       case 1700: // numeric
 
-	if (value.find('0') != string::npos) {
-	  value.erase(value.find_last_not_of('0') + 1, string::npos);
+        if (value.find('0') != string::npos && value.find('.') != string::npos) {
+          value.erase(value.find_last_not_of('0') + 1, string::npos);
 
-	  if (value.length() > 0 && value.substr(value.length() - 1, value.length()) == L".") {
-	    value += L"0";
-	  }
-	}
+          if (value.length() > 0 && value.substr(value.length() - 1, value.length()) == L".") {
+            value += L"0";
+          }
+        }
 
-	break;
+        break;
       }
 
       row.push_back(value);

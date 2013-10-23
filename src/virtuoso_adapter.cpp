@@ -69,7 +69,7 @@ unique_ptr<string> virtuoso_adapter::pwd(const std::string& username) {
   return unique_ptr<string>(nullptr);
 }
 
-virtuoso_adapter::virtuoso_adapter(string dsn, string username) throw(runtime_error) {
+virtuoso_adapter::virtuoso_adapter(string dsn, string username) throw(runtime_error) : _sparql_mode(true) {
   cout << "Connecting to " << dsn << "." << endl;
 
   if (!SQL_SUCCEEDED(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &environment))) {
@@ -134,6 +134,7 @@ void virtuoso_adapter::error() const throw(runtime_error) {
 }
 
 unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
+  bool one_time_sql = false;
 
   if (query.length() > 2 && query.substr(0, 2) == "\\a") {
     query = query.substr(3);
@@ -160,34 +161,77 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       return unique_ptr<table>(nullptr);
     }
 
-  } else if (query.length() > 2 && (query.substr(0, 2) == "\\d" || query.substr(0, 2) == "\\r")) {
+  } else if (query.length() > 2 && (query.substr(0, 2) == "\\r")) {
     string prefix = query.substr(3);
-    _prefixes.remove(prefix);
-    wcout << "Deleted prefix " << prefix.c_str() << "." << endl;
+
+    if (_prefixes.contains(prefix)) {
+      _prefixes.remove(prefix);
+      wcout << L"Deleted prefix " << prefix.c_str() << L"." << endl;
+    } else {
+      wcout << L"No such prefix: “" << prefix.c_str() << "”!" << endl;
+    }
+
     return unique_ptr<table>(nullptr);
+  } else if (query == "\\d") {
+    one_time_sql = true;
+    query = "SELECT table_schema, table_name, table_type FROM information_schema.tables ORDER BY table_schema, table_name";
+  } else if (query.size() > 2 && query.substr(0, 3) == "\\d ") {
+    one_time_sql = true;
+    string name = query.substr(3);
+    auto index = name.find(".");
+
+    if (index != string::npos) {
+      string schema = name.substr(0, index);
+      name = name.substr(index + 1);
+
+      if (name == "*") {
+        query = "SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '" + schema + "' ORDER BY table_name";
+      } else {
+        query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "' AND table_schema = '" + schema + "'";
+      }
+
+    } else {
+      query = "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '" + name + "'";
+    }
+
   } else if (query == "\\p") {
     return _prefixes.format_as_table();
   } else if (query == "\\g") {
     query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } }";
+  } else if (query == "\\s") {
+    _sparql_mode = !_sparql_mode;
+
+    if (_sparql_mode) {
+      wcout << L"Toggled to SPARQL mode." << endl;
+    } else {
+      wcout << L"Toggled to SQL mode." << endl;
+    }
+
+    return unique_ptr<table>(nullptr);
   } else if (query == "\\h" || query == "\\?") {
-    wcout << "\\a <prefix> <iri>   Add a prefix to the prefix table." << endl;
-    wcout << "(\\d|\\r) <prefix>    Delete a prefix from the prefix table." << endl;
-    wcout << "\\g                  List graphs in the currently connected database." << endl;
-    wcout << "(\\h|\\?)             Print this helpful message." << endl;
-    wcout << "\\p                  Print prefix table." << endl;
-    wcout << "\\q                  Disconnect and exit." << endl;
+    wcout << L"\\a <prefix> <iri>   Add a prefix to the prefix table." << endl;
+    wcout << L"\\d (<schema>.)?<table>  Describe the columns of a table."
+          << endl;
+    wcout << L"\\g                  List graphs in the currently connected "
+          << L"database." << endl;
+    wcout << L"(\\h|\\?)             Print this helpful message." << endl;
+    wcout << L"\\p                  Print prefix table." << endl;
+    wcout << L"\\q                  Disconnect and exit." << endl;
+    wcout << L"\\r <prefix>         Delete a prefix from the prefix table."
+          << endl;
+    wcout << L"\\s                  Toggle between SQL and SPARQL mode."
+          << endl;
     return unique_ptr<table>(nullptr);
   }
 
   string prefix = query.substr(0, 6);
 
-  if (prefix == "sparql" || prefix == "SPARQL" || prefix == "Sparql") {
-    query = "SPARQL " + _prefixes.format() + " " + query.substr(6);
-  } else {
+  if (_sparql_mode && !one_time_sql && prefix != "SPARQL" && prefix != "sparql") {
     query = "SPARQL " + _prefixes.format() + " " + query;
   }
 
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
+  wcout << L"Executing query “" << query.c_str() << L"”" << endl;
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
     error();

@@ -58,6 +58,7 @@ private:
   SQLHANDLE statement = SQL_NULL_HANDLE;
 
   prefixes _prefixes;
+  bool _sparql_mode;
 
   /**
    * Called internally to retrieve the SQL error state if some SQL function call failed.

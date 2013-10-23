@@ -61,6 +61,15 @@ public:
   virtual void add(std::string prefix, std::string iri);
 
   /**
+   * Check whether or not this mapping contains a specific prefix.
+   *
+   * @param prefix  The prefix to check for.
+   * @return        {@code true} if this mapping contains the given prefix or
+   *                {@code false} otherwise.
+   */
+  virtual bool contains(std::string prefix);
+
+  /**
    * Remove a prefix from this mapping.
    *
    * @param prefix  The prefix that shall be removed.
