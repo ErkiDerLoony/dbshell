@@ -25,4 +25,4 @@ endif (DOXYGEN_FOUND)
 add_subdirectory(src)
 
 include_directories(src)
-add_subdirectory(test)
+add_subdirectory(test EXCLUDE_FROM_ALL)
