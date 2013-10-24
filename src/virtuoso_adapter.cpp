@@ -231,7 +231,6 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
   }
 
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
-  wcout << L"Executing query “" << query.c_str() << L"”" << endl;
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
     error();
