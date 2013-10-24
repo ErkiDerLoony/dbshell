@@ -39,6 +39,8 @@ using namespace dbshell;
 using std::unique_ptr;
 using std::string;
 using std::wstring;
+using std::wstringstream;
+using std::move;
 using std::wcout;
 using std::cerr;
 using std::cout;
@@ -51,6 +53,7 @@ using std::vector;
 
 namespace dbshell {
   bool running = false;
+  bool transpose = false;
   unique_ptr<db_adapter> connection = unique_ptr<db_adapter>(nullptr);
 }
 
@@ -63,6 +66,30 @@ void handler(int sig) {
   }
 
   dbshell::connection->cancel();
+}
+
+unique_ptr<dbshell::table> transpose(unique_ptr<table> table) {
+  unique_ptr<dbshell::table> copy = unique_ptr<dbshell::table>(new dbshell::table());
+  copy->add_column(L"Column");
+
+  for (uint i = 0; i < table->rows(); i++) {
+    wstringstream name;
+    name << L"Row № " << (i+1);
+    copy->add(name.str());
+  }
+
+  for (uint i = 0; i < table->cols(); i++) {
+    vector<wstring> row;
+    row.push_back(table->column(i));
+
+    for (uint j = 0; j < table->rows(); j++) {
+      row.push_back(table->row(j)[i]);
+    }
+
+    copy->add(row);
+  }
+
+  return copy;
 }
 
 int main(int argc, char** argv) {
@@ -154,6 +181,19 @@ int main(int argc, char** argv) {
       break;
     }
 
+    if (line == "\\x") {
+
+      if (dbshell::transpose) {
+        wcout << L"No longer transposing output tables." << endl;
+        dbshell::transpose = false;
+      } else {
+        wcout << L"Transposing future output tables." << endl;
+        dbshell::transpose = true;
+      }
+
+      continue;
+    }
+
     try {
       struct timeval start;
       gettimeofday(&start, nullptr);
@@ -168,6 +208,11 @@ int main(int argc, char** argv) {
       struct timeval end;
       gettimeofday(&end, nullptr);
       const long diff = end.tv_sec * 1000 + end.tv_usec / 1000 - start.tv_sec * 1000 - start.tv_usec / 1000;
+
+      if (dbshell::transpose) {
+        table = ::transpose(move(table));
+      }
+
       wcout << *table << endl;
       wcout << table->rows() << " row";
       if (table->rows() != 1) wcout << "s";

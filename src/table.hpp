@@ -50,6 +50,9 @@ public:
    */
   uint columns() const;
 
+  /** @copydoc uint columns() */
+  uint cols() const;
+
   /**
    * Access the number of rows in this table.
    *
@@ -100,9 +103,7 @@ public:
            alignment_type paragraph_alignment = alignment_type::LEFT,
            std::wstring alignment_character = L"");
 
-  /**
-   * @copydoc add(std::string, alignment_type, std::string)
-   */
+  /** @copydoc add(std::string, alignment_type, std::string) */
   void add_column(std::wstring name,
                   alignment_type paragraph_alignment = alignment_type::LEFT,
                   std::wstring alignment_character = L"");

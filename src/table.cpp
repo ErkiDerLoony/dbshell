@@ -53,6 +53,10 @@ uint table::columns() const {
   return _columns.size();
 }
 
+uint table::cols() const {
+  return columns();
+}
+
 const wstring& table::column(uint index) const throw(range_error) {
 
   if (index >= columns()) {
