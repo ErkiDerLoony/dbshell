@@ -240,7 +240,7 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       if (counter == 0) {
         prefix << ":";
       } else {
-        prefix << counter << ":";
+        prefix << "p" << counter << ":";
       }
 
       wcout << L"Adding prefix " << prefix.str().c_str() << L" for IRI " << iri.str().c_str() << L"." << endl;
