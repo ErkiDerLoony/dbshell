@@ -224,12 +224,6 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     return unique_ptr<table>(nullptr);
   }
 
-  string prefix = query.substr(0, 6);
-
-  if (_sparql_mode && !one_time_sql && prefix != "SPARQL" && prefix != "sparql") {
-    query = "SPARQL " + _prefixes.format() + " " + query;
-  }
-
   if (_sparql_mode && !one_time_sql) {
     string s = query;
     size_t index;
@@ -253,6 +247,12 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
       _prefixes.add(prefix.str(), iri.str());
       counter++;
     }
+  }
+
+  string prefix = query.substr(0, 6);
+
+  if (_sparql_mode && !one_time_sql && prefix != "SPARQL" && prefix != "sparql") {
+    query = "SPARQL " + _prefixes.format() + " " + query;
   }
 
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
