@@ -230,6 +230,31 @@ unique_ptr<table> virtuoso_adapter::query(string query) throw (runtime_error) {
     query = "SPARQL " + _prefixes.format() + " " + query;
   }
 
+  if (_sparql_mode && !one_time_sql) {
+    string s = query;
+    size_t index;
+    int counter = 0;
+
+    while ((index = s.find("FROM <")) != string::npos) {
+      stringstream prefix;
+      s = s.substr(index + 6);
+      auto index2 = s.find(">");
+      stringstream iri;
+      iri << s.substr(0, index2) << "#";
+      s = s.substr(index2 + 1);
+
+      if (counter == 0) {
+        prefix << ":";
+      } else {
+        prefix << counter << ":";
+      }
+
+      wcout << L"Adding prefix " << prefix.str().c_str() << L" for IRI " << iri.str().c_str() << L"." << endl;
+      _prefixes.add(prefix.str(), iri.str());
+      counter++;
+    }
+  }
+
   unique_ptr<table> table(unique_ptr<table>(new dbshell::table()));
 
   if (SQLExecDirect(statement, (SQLCHAR*) query.c_str(), SQL_NTS) != SQL_SUCCESS) {
