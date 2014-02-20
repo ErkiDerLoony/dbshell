@@ -131,6 +131,7 @@ unique_ptr<table> postgres_adapter::query(string query) throw(runtime_error) {
     case 25: // text
     case 705: // unknown
     case 869: // inet
+    case 1042: // blank padded char
     case 1043: // varchar
       result->add(buffer.str());
       break;
